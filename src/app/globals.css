@@ -12,3 +12,19 @@
   --color-pastel-blue: #509fff; /* 🔷 Your sky blue */
   --color-pastel-yellow: #ffef3c; /* 🍋 Bright lemon */
 }
+
+.title {
+  @apply font-medium;
+}
+
+.input {
+  @apply bg-bg p-4 rounded-xl w-full;
+}
+
+.full-button {
+  @apply bg-pastel-blue cursor-pointer py-2 rounded-md px-4 font-bold;
+}
+
+.text-button {
+  @apply text-pastel-blue cursor-pointer py-2;
+}
