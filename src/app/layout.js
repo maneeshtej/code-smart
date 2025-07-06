@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import HeaderBar from "@/components/Dashboard/Header/Header";
 
 export const metadata = {
   title: "Create Next App",
