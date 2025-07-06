@@ -23,7 +23,7 @@
 }
 
 .full-button {
-  @apply bg-pastel-blue cursor-pointer py-2 rounded-md px-4 font-bold;
+  @apply border-pastel-blue border-1 hover:bg-pastel-blue transition cursor-pointer py-2 rounded-md px-7 font-bold;
 }
 
 .text-button {

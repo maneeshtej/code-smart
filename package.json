@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/genai": "^1.8.0",
+    "@monaco-editor/react": "^4.7.0",
     "@supabase/supabase-js": "^2.50.3",
+    "monaco-editor": "^0.52.2",
     "next": "15.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
