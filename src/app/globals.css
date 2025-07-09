@@ -18,6 +18,10 @@
   @apply font-medium;
 }
 
+.heading {
+  @apply text-4xl font-bold;
+}
+
 .input {
   @apply bg-bg p-4 rounded-xl w-full;
 }

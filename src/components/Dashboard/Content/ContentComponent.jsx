@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import QuestionTabComponent from "./tabs/QuestionTabComponent";
 import AssistantComponent from "./tabs/AssistantTabComponent";
+import PlaylistComponent from "./tabs/PlaylistComponent";
 
 const ContentComponent = ({ result, code }) => {
   const tabs = [
@@ -10,7 +11,7 @@ const ContentComponent = ({ result, code }) => {
     { id: 1, name: "Run", component: null },
     { id: 2, name: "Assistant", component: AssistantComponent },
     { id: 3, name: "Solution", component: null },
-    { id: 4, name: "Playlist", component: null },
+    { id: 4, name: "Playlist", component: PlaylistComponent },
   ];
 
   const [activeTabID, setActiveTabID] = useState(0);

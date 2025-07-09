@@ -3,7 +3,7 @@
 import HeaderBar from "@/components/Dashboard/Header/Header";
 import React from "react";
 
-export default function DashboardLayout({ children }) {
+export default function EditorLayout({ children }) {
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       <HeaderBar />
