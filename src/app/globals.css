@@ -2,5 +2,25 @@
 
 @theme {
   --color-background: #323232;
+  --color-background-dark: #1e1e1e;
   --color-text: #ffffff;
+  --color-border: #aaaaaa;
+
+  --color-brightBlue: #243aff;
+  --color-brightPink: #ec4899;
+  --color-brightGreen: #10b981;
+  --color-brightYellow: #facc15;
+  --color-brightOrange: #fb923c;
+
+  --color-pastelBlue: #a5d8ff;
+  --color-pastelGreen: #c3fbd8;
+  --color-pastelPurple: #d7c7ff;
+  --color-pastelYellow: #fff3b0;
+  --color-pastelPink: #ffd6e8;
+
+  --color-matteBlue: #4c566a;
+  --color-matteGreen: #607b7d;
+  --color-mattePurple: #5e4b56;
+  --color-matteGray: #1e1e1e;
+  --color-matteTeal: #3a4d4f;
 }
