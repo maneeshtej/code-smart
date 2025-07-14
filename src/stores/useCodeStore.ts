@@ -9,6 +9,7 @@ export interface LanguageCode {
 }
 
 export interface CodeState {
+  currentLanguage: LanguageKey;
   java: LanguageCode;
   python: LanguageCode;
   c: LanguageCode;
@@ -16,7 +17,12 @@ export interface CodeState {
   javascript: LanguageCode;
   csharp: LanguageCode;
   setMainCode: (lang: LanguageKey, code: string) => void;
+  setCurrentMainCode: (code: string) => void;
+  setCurrentFunctionCode: (code: string) => void;
   setFunctionCode: (lang: LanguageKey, code: string) => void;
+  setCurrentLanguage: (lang: LanguageKey) => void;
+  getCurrentMainCode: () => string;
+  getCurrentFunctionCode: () => string;
   removeMainCode: (lang: LanguageKey) => void;
   removeFunctionCode: (lang: LanguageKey) => void;
   clearAllCodes: () => void;
@@ -30,13 +36,14 @@ const defaultLangCode: LanguageCode = {
 
 export const useCodeStore = create<CodeState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       java: { ...defaultLangCode },
       python: { ...defaultLangCode },
       c: { ...defaultLangCode },
       cpp: { ...defaultLangCode },
       csharp: { ...defaultLangCode },
       javascript: { ...defaultLangCode },
+      currentLanguage: "java",
 
       setMainCode: (lang, code) =>
         set((state) => ({
@@ -47,6 +54,17 @@ export const useCodeStore = create<CodeState>()(
           },
         })),
 
+      setCurrentMainCode: (code) => {
+        const lang = get().currentLanguage;
+        set((state) => ({
+          ...state,
+          [lang]: {
+            ...state[lang],
+            mainCode: code,
+          },
+        }));
+      },
+
       setFunctionCode: (lang, code) =>
         set((state) => ({
           ...state,
@@ -56,12 +74,39 @@ export const useCodeStore = create<CodeState>()(
           },
         })),
 
+      setCurrentFunctionCode: (code) => {
+        const lang = get().currentLanguage;
+        set((state) => ({
+          ...state,
+          [lang]: {
+            ...state[lang],
+            functionCode: code,
+          },
+        }));
+      },
+
+      setCurrentLanguage: (lang) =>
+        set((state) => ({
+          ...state,
+          currentLanguage: lang,
+        })),
+
+      getCurrentMainCode: () => {
+        const state = get();
+        return state[state.currentLanguage].mainCode;
+      },
+
+      getCurrentFunctionCode: () => {
+        const state = get();
+        return state[state.currentLanguage].functionCode;
+      },
+
       removeMainCode: (lang) =>
         set((state) => ({
           ...state,
           [lang]: {
             ...state[lang],
-            main: "",
+            mainCode: "",
           },
         })),
 
@@ -70,7 +115,7 @@ export const useCodeStore = create<CodeState>()(
           ...state,
           [lang]: {
             ...state[lang],
-            function: "",
+            functionCode: "",
           },
         })),
 
