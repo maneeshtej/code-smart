@@ -47,7 +47,7 @@ const QuestionTab = ({ question }: QuestionProps) => {
       </div>
       <div className="px-6">
         <ReactMarkdown>{question && question?.description}</ReactMarkdown>
-        <Spacer height={20} />
+        <Spacer height={30} />
         <div className="flex flex-col">
           <Title text="Example" />
           <Spacer height={10} />
@@ -67,7 +67,7 @@ const QuestionTab = ({ question }: QuestionProps) => {
               ))}
           </div>
         </div>
-        <Spacer height={20} />
+        <Spacer height={30} />
         <div className="flex flex-col">
           <Title text="Constraints" />
           <Spacer />
@@ -78,22 +78,22 @@ const QuestionTab = ({ question }: QuestionProps) => {
               ))}
           </div>
         </div>
-        <Spacer height={20} />
+        <Spacer height={30} />
         <div className="flex flex-col">
           <Title text="Edge cases" />
           <Spacer />
-          <div className="bg-background-dark p-4 rounded-lg font-mono text-sm">
+          <div className="pl-4 text-sm">
             {question &&
               question?.edgeCases.map((edgeCase, index) => (
                 <h3 key={index}>{edgeCase}</h3>
               ))}
           </div>
         </div>
-        <Spacer height={20} />
+        <Spacer height={30} />
         <div className="flex flex-col">
           <Title text="Hints" />
           <Spacer />
-          <div className="bg-background-dark p-4 rounded-lg font-mono text-sm">
+          <div className="pl-4 text-sm">
             {question &&
               question?.hints.map((hint, index) => <h3 key={index}>{hint}</h3>)}
           </div>

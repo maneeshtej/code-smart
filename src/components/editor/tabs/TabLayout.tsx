@@ -1,5 +1,7 @@
+"use client";
+
 import { IconLabel } from "@/components/shared/utils";
-import { Question } from "@/stores/useQuestionStore";
+import { Question, useQuestionStore } from "@/stores/useQuestionStore";
 import {
   ChevronLeft,
   PenLine,
@@ -11,6 +13,8 @@ import {
 } from "lucide-react";
 import React from "react";
 import QuestionTab from "./QuestionTab";
+import { useRouter } from "next/navigation";
+import { useCodeStore } from "@/stores/useCodeStore";
 
 type TabProps = {
   question: Question;
@@ -25,10 +29,21 @@ const menuItems = [
 ];
 
 const TabLayout = ({ question }: TabProps) => {
+  const router = useRouter();
+  const { clearAllCodes } = useCodeStore();
+  const { clearQuestion } = useQuestionStore();
+  const navToDash = () => {
+    clearAllCodes();
+    clearQuestion();
+    router.back();
+  };
   return (
     <div className="h-full w-full flex flex-col xl:flex-row">
       <div className=" border-b-1 xl:border-r-1 xl:border-b-0 border-border flex flex-row xl:flex-col pb-2">
-        <div className="p-4 cursor-pointer flex items-center justify-center">
+        <div
+          className="p-4 cursor-pointer flex items-center justify-center"
+          onClick={navToDash}
+        >
           <ChevronLeft size={30} />
         </div>
         <div className="flex flex-1 flex-row fixed xl:static bottom-0 left-0 right-0 border-t-1 xl:border-t-0 border-border bg-background xl:flex-col items-center justify-between xl:justify-center">

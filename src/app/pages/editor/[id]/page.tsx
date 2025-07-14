@@ -41,8 +41,6 @@ const EditorPage = () => {
     difficulty: "Easy",
     timeComplexity: "O(1)",
     spaceComplexity: "O(1)",
-    function: `function placeholder() {\n  // No logic yet\n}`,
-    main: `console.log("Placeholder test");`,
   };
 
   const noQuestion: Question = {
@@ -58,8 +56,6 @@ const EditorPage = () => {
     difficulty: "Easy",
     timeComplexity: "O(1)",
     spaceComplexity: "O(1)",
-    function: `function placeholder() {\n  // No logic yet\n}`,
-    main: `console.log("Placeholder test");`,
   };
 
   const params = useParams();

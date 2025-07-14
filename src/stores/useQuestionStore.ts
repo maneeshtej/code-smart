@@ -14,8 +14,6 @@ export interface Question {
   difficulty: "Easy" | "Medium" | "Hard";
   timeComplexity: string;
   spaceComplexity: string;
-  function: string;
-  main: string;
 }
 
 interface Example {

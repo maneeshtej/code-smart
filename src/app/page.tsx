@@ -1,11 +1,13 @@
 "use client";
 
+import { useCodeStore } from "@/stores/useCodeStore";
 import { Question, useQuestionStore } from "@/stores/useQuestionStore";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
   const { setQuestion, clearQuestion } = useQuestionStore();
+  const { setMainCode, setFunctionCode } = useCodeStore();
 
   const sampleQuestion: Question = {
     id: "gen-xyz",
@@ -58,13 +60,23 @@ export default function Home() {
     timeComplexity: "O(n)",
 
     spaceComplexity: "O(1)",
-
-    function: `function maxSumSubarray(nums, k) {
-    // Your code here
-  }`,
-
-    main: `console.log(maxSumSubarray([1, 4, 2, 10, 2, 3, 1, 0, 20], 4)); // 24`,
   };
+
+  const functionCode: string = `
+  public static int findMaxSum(int[] nums, int k) {
+    // user edits here
+}
+  `;
+
+  const mainCode: string = `
+  public class Main {
+    public static void main(String[] args) {
+        int[] nums = {1, 4, 2, 10, 2, 3, 1, 0, 20};
+        int k = 4;
+        System.out.println("Max Sum: " + findMaxSum(nums, k));
+    }
+}
+`;
 
   return (
     <div className="h-screen w-screen flex items-center justify-center flex-col bg-background text-text">
@@ -82,6 +94,14 @@ export default function Home() {
       </button>
       <button onClick={() => setQuestion(sampleQuestion)}>Add question</button>
       <button onClick={() => clearQuestion()}> Clear Question</button>
+      <button onClick={() => setMainCode("java", mainCode)}>
+        {" "}
+        set main code
+      </button>
+      <button onClick={() => setFunctionCode("java", functionCode)}>
+        {" "}
+        set function code
+      </button>
     </div>
   );
 }
