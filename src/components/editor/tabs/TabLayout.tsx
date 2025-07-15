@@ -13,11 +13,12 @@ import {
 import React, { useEffect, useState } from "react";
 import QuestionTab from "./QuestionTab";
 import { useRouter } from "next/navigation";
+import AssistantTab from "./AssistantTab";
 
 const menuItems = [
   { id: 0, name: "Question", icon: PenLine, component: QuestionTab },
   { id: 1, name: "Run", icon: Play, component: null },
-  { id: 2, name: "Assistant", icon: Bot, component: null },
+  { id: 2, name: "Assistant", icon: Bot, component: AssistantTab },
   { id: 3, name: "Solution", icon: Lightbulb, component: null },
   { id: 4, name: "Related", icon: Files, component: null },
 ];
@@ -86,7 +87,9 @@ const TabLayout = () => {
           <User size={20} />
         </div>
       </div>
-      <div>{CurrentComponent ? <CurrentComponent /> : <DummyComponent />}</div>
+      <div className="h-full w-full flex">
+        {CurrentComponent ? <CurrentComponent /> : <DummyComponent />}
+      </div>
     </div>
   );
 };
