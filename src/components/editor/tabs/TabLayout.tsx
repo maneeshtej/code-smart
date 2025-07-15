@@ -14,6 +14,7 @@ import React, { useEffect, useState } from "react";
 import QuestionTab from "./QuestionTab";
 import { useRouter } from "next/navigation";
 import AssistantTab from "./AssistantTab";
+import { useCodeStore } from "@/stores/useCodeStore";
 
 const menuItems = [
   { id: 0, name: "Question", icon: PenLine, component: QuestionTab },
@@ -33,8 +34,10 @@ const TabLayout = () => {
   const CurrentComponent = menuItems.find(
     (item) => item.id === currentTabID
   )?.component;
+  const clearAllCodes = useCodeStore((s) => s.clearAllCodes);
 
   const navToDash = () => {
+    clearAllCodes();
     router.back();
   };
 

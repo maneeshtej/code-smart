@@ -1,7 +1,8 @@
 "use client";
 
 import { useCodeStore } from "@/stores/useCodeStore";
-import React from "react";
+import { useQuestionStore } from "@/stores/useQuestionStore";
+import React, { useEffect } from "react";
 
 const supportedLanguages = [
   { key: "java", label: "Java" },
@@ -12,8 +13,76 @@ const supportedLanguages = [
   { key: "csharp", label: "C#" },
 ] as const;
 
-const LanguageSelector = () => {
-  const { currentLanguage, setCurrentLanguage } = useCodeStore();
+type LanguageSelectorProps = {
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const LanguageSelector = ({ loading, setLoading }: LanguageSelectorProps) => {
+  const currentLanguage = useCodeStore((s) => s.currentLanguage);
+  const setCurrentLanguage = useCodeStore((s) => s.setCurrentLanguage);
+  const getCurrentFunctionCode = useCodeStore((s) => s.getCurrentFunctionCode);
+  const setCurrentFunctionCode = useCodeStore((s) => s.setCurrentFunctionCode);
+  const question = useQuestionStore((s) => s.question);
+
+  useEffect(() => {
+    const currentFunctionCode = getCurrentFunctionCode();
+    if (currentFunctionCode === "") {
+      console.log("Generating code....");
+      getLanguageCode();
+    } else {
+      console.log("Getting from zustand....");
+    }
+  }, [currentLanguage, getCurrentFunctionCode, setCurrentFunctionCode]);
+
+  const getLanguageCode = async () => {
+    console.log("started...");
+    if (
+      !question?.title ||
+      !question?.question ||
+      !question?.description ||
+      !currentLanguage
+    ) {
+      console.error("no proper params");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await fetch("/api/gemini/generate-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language: currentLanguage,
+          title: question.title,
+          question: question.question,
+          description: question.description,
+        }),
+      });
+
+      if (!res.ok) console.error("Failed to fetch");
+
+      const data = await res.json();
+
+      const cleaned = data.text
+        .replace(/^```json/, "")
+        .replace(/^```/, "")
+        .replace(/```$/, "")
+        .trim();
+
+      const parsed = JSON.parse(cleaned);
+
+      setCurrentFunctionCode(parsed.functionCode);
+
+      console.log(parsed);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -28,7 +97,8 @@ const LanguageSelector = () => {
             e.target.value as (typeof supportedLanguages)[number]["key"]
           )
         }
-        className="p-2 bg-background rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 outline-none"
+        className={`p-2 bg-background rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 outline-none
+          ${loading ? "animate-pulse" : ""}`}
       >
         <option value="" disabled>
           Select a language

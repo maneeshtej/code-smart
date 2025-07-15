@@ -1,13 +1,16 @@
 "use client";
 
+import { Question } from "@/constants/interfaces/questionInterfaces";
 import { generateQuestionPrompt } from "@/constants/prompts/geminiPrompts";
+import { useQuestionStore } from "@/stores/useQuestionStore";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Home() {
   const router = useRouter();
   const [prompt, setPrompt] = useState<string>("");
-  const [result, setResult] = useState();
+  const setQuestion = useQuestionStore((s) => s.setQuestion);
+  const clearQuestion = useQuestionStore((s) => s.clearQuestion);
 
   const generateQuestion = async () => {
     console.log("running...");
@@ -32,21 +35,42 @@ export default function Home() {
 
     try {
       const parsed = JSON.parse(cleaned);
-      console.log("Parsed question:", parsed);
-      setResult(parsed); // Set parsed object in state
+
+      if (parsed.value === false) {
+        clearQuestion();
+        console.log("Illegal prompt");
+        return;
+      }
+
+      const question: Question = {
+        constraints: parsed.constraints,
+        description: parsed.description,
+        difficulty: parsed.difficulty,
+        edgeCases: parsed.edgeCases,
+        examples: parsed.examples,
+        hints: parsed.hints,
+        id: parsed.id,
+        question: parsed.question,
+        spaceComplexity: parsed.spaceComplexity,
+        timeComplexity: parsed.timeComplexity,
+        title: parsed.title,
+        topics: parsed.topics,
+      };
+
+      setQuestion(question);
+
+      console.log(question);
     } catch (e) {
       console.error("Failed to parse Gemini response:", e);
     }
-
-    // setResult(data);
   };
 
   // useEffect(() => {
-  //   console.log(result);
-  // }, [result]);
+  //   console.log(parsed);
+  // }, [parsed]);
 
   // useEffect(() => {
-  //   console.log(result);
+  //   console.log(parsed);
   // }, []);
 
   return (

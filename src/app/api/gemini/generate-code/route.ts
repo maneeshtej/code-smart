@@ -1,3 +1,4 @@
+import { generateCodePrompt } from "@/constants/prompts/geminiPrompts";
 import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,15 +17,17 @@ export const POST = async (req: NextRequest) => {
     const ai = new GoogleGenAI({ apiKey });
     console.log("GoogleGenAI client initialized");
 
-    const body = await req.json();
-    console.log("Request Body:", body);
+    const { language, title, question, description } = await req.json();
 
-    const prompt = body.prompt;
+    const prompt = generateCodePrompt(language, title, question, description);
+
+    console.log("Request Body:", prompt);
+
     if (!prompt) {
       console.error("Prompt is missing in request body");
       throw new Error("Prompt is missing");
     }
-    console.log("Prompt Received:", prompt);
+    // console.log("Prompt Received:", prompt);
 
     const result = await ai.models.generateContent({
       model: "gemini-2.0-flash",
@@ -36,7 +39,6 @@ export const POST = async (req: NextRequest) => {
     //   JSON.stringify(result, null, 2)
     // );
 
-    // 5. Extract response text safely
     const text = result.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
     console.log("🔹 Final Extracted Text:", text);
