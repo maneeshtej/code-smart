@@ -13,12 +13,10 @@ export const POST = async (req: NextRequest) => {
 
     const result = await ai.models.generateContent({
       model: "gemini-2.0-flash",
-      contents: prompt,
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
-    const response = result.text;
-
-    return NextResponse.json(response);
+    return NextResponse.json({ text: result.text });
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.error("Gemini Error:", err.message);
