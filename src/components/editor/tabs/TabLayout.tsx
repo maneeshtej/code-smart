@@ -29,7 +29,7 @@ const DummyComponent = () => {
 
 const TabLayout = () => {
   const router = useRouter();
-  const [currentTabID, setCurrentTabID] = useState<number>(-1);
+  const [currentTabID, setCurrentTabID] = useState<number>(0);
   const CurrentComponent = menuItems.find(
     (item) => item.id === currentTabID
   )?.component;
@@ -45,9 +45,8 @@ const TabLayout = () => {
   };
 
   useEffect(() => {
-    const localCurrentTabID = JSON.parse(
-      localStorage.getItem("editor-tab-id") || "0"
-    );
+    const stored = localStorage.getItem("editor-tab-id");
+    const localCurrentTabID = stored ? JSON.parse(stored) : 0;
     setCurrentTabID(localCurrentTabID);
   }, []);
 

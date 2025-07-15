@@ -17,7 +17,7 @@ const EditorPage = () => {
 
   return (
     <div className="bg-background text-text h-screen w-screen flex flex-row">
-      <div className="flex flex-1">
+      <div className="flex flex-1 ">
         <EditorLayout id={id} />
       </div>
     </div>
