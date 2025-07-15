@@ -1,13 +1,10 @@
 import { Heading, Spacer, Title } from "@/components/shared/utils";
-import { Question } from "@/stores/useQuestionStore";
+import { useQuestionStore } from "@/stores/useQuestionStore";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 
-type QuestionProps = {
-  question: Question;
-};
-
-const QuestionTab = ({ question }: QuestionProps) => {
+const QuestionTab = () => {
+  const question = useQuestionStore((s) => s.question);
   return (
     <div className="h-full w-full flex flex-col overflow-y-auto max-w-full pb-20">
       <div className="p-6">
