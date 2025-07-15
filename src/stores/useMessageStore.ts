@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { MessageElement } from "@/constants/interfaces/messageInterfaces";
-import { messages } from "@/constants/dev";
+import { persist, PersistOptions } from "zustand/middleware";
 
 interface MessageStore {
   messages: MessageElement[];
@@ -8,11 +8,22 @@ interface MessageStore {
   clearMessages: () => void;
 }
 
-export const useMessageStore = create<MessageStore>((set) => ({
-  messages: messages,
-  addMessage: (msg) =>
-    set((state) => ({
-      messages: [...state.messages, msg],
-    })),
-  clearMessages: () => set({ messages: [] }),
-}));
+const defaultMessages: MessageElement[] = [];
+
+type MessageStorePersist = PersistOptions<MessageStore>;
+
+export const useMessageStore = create<MessageStore>()(
+  persist<MessageStore, [], [], MessageStorePersist>(
+    (set) => ({
+      messages: defaultMessages,
+      addMessage: (msg) =>
+        set((state) => ({
+          messages: [...state.messages, msg],
+        })),
+      clearMessages: () => set({ messages: [] }),
+    }),
+    {
+      name: "messageStore", // key in localStorage
+    }
+  )
+);

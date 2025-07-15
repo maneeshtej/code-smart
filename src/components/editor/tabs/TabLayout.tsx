@@ -29,7 +29,7 @@ const DummyComponent = () => {
 
 const TabLayout = () => {
   const router = useRouter();
-  const [currentTabID, setCurrentTabID] = useState<number>(0);
+  const [currentTabID, setCurrentTabID] = useState<number>(-1);
   const CurrentComponent = menuItems.find(
     (item) => item.id === currentTabID
   )?.component;
@@ -45,7 +45,14 @@ const TabLayout = () => {
   };
 
   useEffect(() => {
-    console.log(menuItems.filter((item) => item.id === currentTabID));
+    const localCurrentTabID = JSON.parse(
+      localStorage.getItem("editor-tab-id") || "0"
+    );
+    setCurrentTabID(localCurrentTabID);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("editor-tab-id", JSON.stringify(currentTabID));
   }, [currentTabID]);
 
   return (
@@ -88,7 +95,11 @@ const TabLayout = () => {
         </div>
       </div>
       <div className="h-full w-full flex">
-        {CurrentComponent ? <CurrentComponent /> : <DummyComponent />}
+        {CurrentComponent ? (
+          <CurrentComponent key={currentTabID} />
+        ) : (
+          <DummyComponent />
+        )}
       </div>
     </div>
   );
