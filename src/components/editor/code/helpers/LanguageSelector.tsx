@@ -34,6 +34,7 @@ const LanguageSelector = ({ loading, setLoading }: LanguageSelectorProps) => {
     } else {
       console.log("Getting from zustand....");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLanguage, getCurrentFunctionCode, setCurrentFunctionCode]);
 
   const getLanguageCode = async () => {
