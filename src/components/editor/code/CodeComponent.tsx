@@ -1,7 +1,7 @@
 "use client";
 
 import { Editor } from "@monaco-editor/react";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as monacoEditor from "monaco-editor";
 import { useCodeStore } from "@/stores/useCodeStore";
 import LanguageSelector from "./helpers/LanguageSelector";
@@ -24,6 +24,27 @@ const CodeComponent = () => {
     editor.focus();
   };
 
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const model = editor.getModel();
+    if (!model) return;
+
+    const current = model.getValue();
+    if (current == functionCode) return;
+
+    editor.pushUndoStop();
+    editor.executeEdits(null, [
+      {
+        range: model.getFullModelRange(),
+        text: functionCode,
+        forceMoveMarkers: true,
+      },
+    ]);
+    editor.popUndoStop();
+  }, [functionCode]);
+
   return (
     <div className="h-full w-full bg-background-dark rounded-xl flex flex-col items-end justify-end p-6">
       <div className="w-full">
@@ -35,7 +56,6 @@ const CodeComponent = () => {
           theme="vs-dark"
           height="100%"
           language={language}
-          value={functionCode}
           onChange={(value) => setFunctionCode(value || "")}
           onMount={handleEditorDidMount}
           options={{

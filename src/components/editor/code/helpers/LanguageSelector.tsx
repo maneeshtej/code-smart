@@ -1,5 +1,6 @@
 "use client";
 
+import { generateCodePrompt } from "@/constants/prompts/geminiPrompts";
 import { useCodeStore } from "@/stores/useCodeStore";
 import { useQuestionStore } from "@/stores/useQuestionStore";
 import React, { useEffect } from "react";
@@ -47,18 +48,22 @@ const LanguageSelector = ({ loading, setLoading }: LanguageSelectorProps) => {
       return;
     }
 
+    const prompt = generateCodePrompt(
+      currentLanguage,
+      question.title,
+      question.question,
+      question.description
+    );
+
     try {
       setLoading(true);
-      const res = await fetch("/api/gemini/generate-code", {
+      const res = await fetch("/api/gemini/general-api", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          language: currentLanguage,
-          title: question.title,
-          question: question.question,
-          description: question.description,
+          prompt: prompt,
         }),
       });
 

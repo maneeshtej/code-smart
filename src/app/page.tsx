@@ -15,7 +15,7 @@ export default function Home() {
   const generateQuestion = async () => {
     console.log("running...");
     const geminiPrompt = generateQuestionPrompt(prompt);
-    const res = await fetch("/api/gemini/generate-question", {
+    const res = await fetch("/api/gemini/general-api", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
