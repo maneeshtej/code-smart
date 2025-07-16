@@ -16,12 +16,14 @@ type AIBlock =
 const AssistantTab = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userMessage, setUserMessage] = useState<string>("");
   const [aiMessage, setAiMessage] = useState<AIBlock[]>([]);
   const langauge = useCodeStore((s) => s.currentLanguage);
   const functionCode = useCodeStore((s) => s.getCurrentFunctionCode());
   const setCurrentFunctionCode = useCodeStore((s) => s.setCurrentFunctionCode);
   const question = useQuestionStore((s) => s.question);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSend = async () => {
