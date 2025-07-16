@@ -10,7 +10,7 @@ type EditorProps = {
 const EditorLayout = ({ id }: EditorProps) => {
   console.log(id);
   return (
-    <div className="h-full w-full flex flex-col xl:flex-row overflow-y-auto xl:overflow-y-hidden gap-6 min-w-full pb-20">
+    <div className="h-full w-full flex flex-col xl:flex-row overflow-y-auto xl:overflow-y-hidden gap-6 min-w-full pb-20 text-text">
       <div className=" min-h-[80dvh] xl:min-h-[100dvh] xl:flex xl:flex-1 overflow-auto">
         <TabLayout />
       </div>

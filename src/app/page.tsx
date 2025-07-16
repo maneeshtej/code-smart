@@ -11,6 +11,7 @@ export default function Home() {
   const [prompt, setPrompt] = useState<string>("");
   const setQuestion = useQuestionStore((s) => s.setQuestion);
   const clearQuestion = useQuestionStore((s) => s.clearQuestion);
+  const question = useQuestionStore((s) => s.question);
 
   const generateQuestion = async () => {
     console.log("running...");
@@ -88,7 +89,9 @@ export default function Home() {
           setPrompt(e.target.value);
         }}
       />
+      {question && <div>{question.title}</div>}
       <button onClick={generateQuestion}>Generate</button>
+      <button onClick={() => router.push("/pages/room/")}>Room</button>
     </div>
   );
 }
