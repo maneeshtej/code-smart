@@ -134,12 +134,14 @@ const AssistantTab = () => {
 
           if (message.type === "code") {
             return (
-              <pre
+              <div
                 key={index}
-                className="whitespace-pre-wrap break-words bg-black text-white p-2 rounded overflow-x-auto"
+                className="bg-background-dark text-text p-4 rounded-xl flex flex-col gap-4"
               >
-                <code>{message.content}</code>
-              </pre>
+                <pre className="whitespace-pre-wrap break-words">
+                  {message.content}
+                </pre>
+              </div>
             );
           }
 
