@@ -1,26 +1,40 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Playwrite+CA:wght@100..400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+/* open sans */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 
 @theme {
   --color-background: #323232;
-  --color-background-dark: #1e1e1e;
+  --color-background-dark: rgb(10, 10, 10);
   --color-text: #ffffff;
   --color-border: #aaaaaa;
 
-  --color-brightBlue: #243aff;
+  /* Purple Themed Colors */
+  --color-brightPurple: #a259ff;
+  --color-deepPurple: #6c2eb7;
+  --color-softPurple: #d7c7ff;
   --color-brightPink: #ec4899;
-  --color-brightGreen: #10b981;
+  --color-brightBlue: #7c3aed;
+  --color-brightGreen: #a3e635;
   --color-brightYellow: #facc15;
   --color-brightOrange: #fb923c;
 
-  --color-pastelBlue: #a5d8ff;
-  --color-pastelGreen: #c3fbd8;
-  --color-pastelPurple: #d7c7ff;
-  --color-pastelYellow: #fff3b0;
-  --color-pastelPink: #ffd6e8;
+  --color-pastelPurple: #e9d5ff;
+  --color-pastelBlue: #c7d2fe;
+  --color-pastelPink: #fbcfe8;
+  --color-pastelGreen: #d1fae5;
+  --color-pastelYellow: #fef9c3;
 
-  --color-matteBlue: #4c566a;
-  --color-matteGreen: #607b7d;
   --color-mattePurple: #5e4b56;
+  --color-matteBlue: #6d28d9;
+  --color-matteGreen: #a7f3d0;
   --color-matteGray: #1e1e1e;
-  --color-matteTeal: #3a4d4f;
+  --color-matteTeal: #a78bfa;
+
+  --font-cursive: "Playwrite CA", sans-serif;
+  --font-inter: "Inter", sans-serif;
+  --font-open-sans: "Open Sans", sans-serif;
+
+  --color-borderc: rgb(50, 50, 50);
 }

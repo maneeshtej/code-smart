@@ -1,4 +1,10 @@
-type LanguageKey = "java" | "python" | "c" | "cpp" | "javascript" | "csharp";
+export type LanguageKey =
+  | "java"
+  | "python"
+  | "c"
+  | "cpp"
+  | "javascript"
+  | "csharp";
 
 export interface LanguageCode {
   mainCode: string;

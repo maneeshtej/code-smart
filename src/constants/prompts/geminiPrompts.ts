@@ -69,46 +69,49 @@ export const generateCodePrompt = (
   description: string
 ) => `
   You are a strict code generator.
-  
+
   Given the following information:
-  
+
   - Language: ${language}
   - Title: ${title}
   - Question: ${question}
   - Description: ${description}
-  
+
   🔧 Your task is to:
   1. Generate only the **function definition** (do not implement it).
   2. Include a **TODO comment** inside the function body to indicate where logic should go.
   3. Use a function name that reflects the title (e.g., "twoSum" for "Two Sum").
-  
+  4. Also generate a **main entry point** (empty, no input/output, no print/console).
+     - In Java/C++/C#: provide a \`main\` method inside a class/program structure.
+     - In Python/JavaScript: provide a \`main()\` function.
+     - Inside main, just leave a \`// TODO: call your function here\` placeholder.
+
   🛑 Do NOT generate:
-  - Example usage
-  - main method
-  - print statements
-  - input/output logic
-  - any full solution
-  
-  ✅ Return a **strict JSON object** with only the \`functionCode\` key, like this:
+  - Example usage with values
+  - Full solution
+  - Any explanations, markdown, or comments outside TODOs
+
+  ✅ Return a **strict JSON object** with exactly these two keys:
   
   \`\`\`json
   {
-    "functionCode": "<function signature with TODO comment>"
+    "functionCode": "<function signature with TODO comment>",
+    "mainCode": "<main/driver function with TODO placeholder>"
   }
   \`\`\`
-  
+
   📌 Rules:
   - No explanation or markdown outside the JSON block.
-  - Output must be valid JSON with only the \`functionCode\` field.
-  - Do not rename or omit the \`functionCode\` key.
+  - Output must be valid JSON with only the \`functionCode\` and \`mainCode\` fields.
+  - Do not rename or omit keys.
   - Language must match the one specified.
-  
+
   If the inputs are unclear, return:
-  
+
   \`\`\`json
-  { "functionCode": "" }
+  { "functionCode": "", "mainCode": "" }
   \`\`\`
-  `;
+`;
 
 export const assistantPrompt = (
   prompt: string,

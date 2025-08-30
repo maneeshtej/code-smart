@@ -1,5 +1,5 @@
 export interface Question {
-  id: string;
+  userId: string;
   title: string;
   question: string;
   description: string;
@@ -11,6 +11,7 @@ export interface Question {
   difficulty: "Easy" | "Medium" | "Hard";
   timeComplexity: string;
   spaceComplexity: string;
+  relatedQuestions?: string[];
 }
 
 export interface Example {
