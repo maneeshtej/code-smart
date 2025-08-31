@@ -57,12 +57,32 @@ export const signUpWithEmailAndPassword = async (
   }
 };
 
-export const getUserID = async () => {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
-  if (error || !session?.user) return;
+export const getSessionData = async () => {
+  try {
+    const { data: sessionData, error } = await supabase.auth.getSession();
 
-  return session?.user.id;
+    if (error || !sessionData?.session?.user) {
+      return apiResponse(false, null, error, "No session", 400);
+    }
+
+    const userID = sessionData.session.user.id;
+
+    return apiResponse(
+      true,
+      { userID, session: sessionData.session },
+      null,
+      "User exists",
+      200
+    );
+  } catch (error) {
+    return apiResponse(false, null, error, "Something failed", 400);
+  }
+};
+
+export const getUserID = async () => {
+  const res = await getSessionData();
+  const sessionData: apiResponseInterface = await res.json();
+  const userID = sessionData.data.userID;
+  if (!userID) return null;
+  return userID;
 };

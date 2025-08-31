@@ -2,8 +2,9 @@
 "use client";
 import { Question } from "@/constants/interfaces/questionInterfaces";
 import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
-import { getUserID } from "@/lib/auth/auth";
+import { getSessionData } from "@/lib/auth/auth";
 import { generateQuestionWithGemini } from "@/lib/gemini/questionGenerate";
+import { uploadQuestion } from "@/lib/supabase/supabaseInsert";
 import { useCodeStore } from "@/stores/useCodeStore";
 import { useQuestionStore } from "@/stores/useQuestionStore";
 import { ArrowLeft } from "lucide-react";
@@ -31,15 +32,19 @@ const Generate = () => {
     if (questionParams.typeID === 0) {
       try {
         setLoading(true);
-        const userId = await getUserID();
+        console.log("started");
+        const sessionRes = await getSessionData();
+        const sessionData: apiResponseInterface = await sessionRes.json();
+        const userId = sessionData.data.userID;
         if (!userId) {
           console.error("No suer ID");
           return;
         }
+        console.log("got user ID");
         const res: apiResponseInterface = await generateQuestionWithGemini(
           textField
         );
-        const data = res.data;
+        const data: Question = res.data;
         console.log(data);
         const question: Question = {
           userId: userId,
@@ -51,12 +56,22 @@ const Generate = () => {
           edgeCases: data.edgeCases || [],
           hints: data.hints || [],
           topics: data.topics || [],
+          tags: data.tags || [],
           difficulty: data.difficulty as "Easy" | "Medium" | "Hard",
           timeComplexity: data.timeComplexity,
           spaceComplexity: data.spaceComplexity,
         };
-        console.log(question);
-        setQuestion(question);
+        // console.log(question);
+        console.log("generated question");
+        const id = await uploadQuestion(question);
+        if (!id) {
+          console.error("np id");
+          return;
+        }
+        console.log("uploaded to supabase");
+        const finalQuestion: Question = { ...question, id: id };
+        console.log(finalQuestion);
+        setQuestion(finalQuestion);
       } catch (error) {
         console.log(error);
       } finally {

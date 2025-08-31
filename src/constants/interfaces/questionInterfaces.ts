@@ -1,4 +1,5 @@
 export interface Question {
+  id?: string;
   userId: string;
   title: string;
   question: string;
@@ -8,10 +9,10 @@ export interface Question {
   edgeCases: string[];
   hints: string[];
   topics: string[];
+  tags: string[];
   difficulty: "Easy" | "Medium" | "Hard";
   timeComplexity: string;
   spaceComplexity: string;
-  relatedQuestions?: string[];
 }
 
 export interface Example {

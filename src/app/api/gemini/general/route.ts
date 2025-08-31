@@ -16,7 +16,12 @@ export async function POST(request: Request) {
     const text = res.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
     const cleanedText = text.replace(/^```json\s*/, "").replace(/\s*```$/, "");
 
-    const parsed = JSON.parse(cleanedText);
+    let parsed;
+    try {
+      parsed = JSON.parse(cleanedText);
+    } catch (e) {
+      return apiResponse(false, null, e, "Failed to parse AI response", 400);
+    }
     return apiResponse(true, parsed, null, "Generated successfully");
 
     console.log(res);

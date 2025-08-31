@@ -4,7 +4,7 @@ import CodeEditor from "@/components/code-editor/CodeEditor";
 import EditorTabs from "@/components/code-editor/EditorTabs";
 import SideBar from "@/components/code-editor/SideBar";
 import { useQuestionStore } from "@/stores/useQuestionStore";
-import { ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import React, { useState } from "react";
 

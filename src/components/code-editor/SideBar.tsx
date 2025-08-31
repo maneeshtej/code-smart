@@ -1,21 +1,147 @@
 "use client";
 
 import { Question } from "@/constants/interfaces/questionInterfaces";
+import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import { getSessionData } from "@/lib/auth/auth";
+import {
+  generateQuestionWithGemini,
+  generateRelatedQuestions,
+} from "@/lib/gemini/questionGenerate";
+import { uploadQuestion } from "@/lib/supabase/supabaseInsert";
+import { useCodeStore } from "@/stores/useCodeStore";
+import { useQuestionStore } from "@/stores/useQuestionStore";
 import { ArrowLeft, Link } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const SideBar = ({ question }: { question: Question | null }) => {
-  // if (question === null)
-  //   return (
-  //     <div className="w-full h-full bg-background-dark animate-pulse"></div>
-  //   );
   const router = useRouter();
+  const [relatedQuestions, setRelatedQuestions] = useState<string[]>([""]);
+  const clearQuestion = useQuestionStore((s) => s.clearQuestion);
+  const clearAllCodes = useCodeStore((s) => s.clearAllCodes);
+  const setQuestion = useQuestionStore((s) => s.setQuestion);
+
+  const fetchRelatedQuestions = async () => {
+    if (!question) return;
+    if (question.title === null || question.description === null) return;
+
+    const storageKey = `relatedQuestions-${question.title}`;
+
+    // Check localStorage first
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem(storageKey);
+      if (cached) {
+        setRelatedQuestions(JSON.parse(cached));
+        return; // skip API call
+      }
+    }
+
+    // Fetch from API
+    setRelatedQuestions(["Fetching questions"]);
+    try {
+      const res: apiResponseInterface = await generateRelatedQuestions(
+        question
+      );
+
+      if (!res.success) {
+        console.log(res);
+        setRelatedQuestions(["Unable to fetch"]);
+        return;
+      }
+
+      setRelatedQuestions(res.data);
+
+      // Store in localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem(storageKey, JSON.stringify(res.data));
+      }
+    } catch (error) {
+      setRelatedQuestions(["Unable to fetch"]);
+      console.log(error);
+    }
+  };
+
+  const handleBack = () => {
+    localStorage.removeItem(`relatedQuestions`);
+    clearAllCodes();
+    clearQuestion();
+    router.back();
+  };
+
+  const handleChangeQuestion = async (prompt: string) => {
+    if (relatedQuestions.length <= 0) return;
+    console.log("loading");
+
+    try {
+      const sessionRes = await getSessionData();
+      const sessionData: apiResponseInterface = await sessionRes.json();
+
+      // console.log(sessionData);
+
+      const userID = sessionData.data.userID;
+
+      if (!userID) {
+        console.error("No user ID");
+        return;
+      }
+      console.log("fetched ID");
+
+      // Generate question using Gemini
+      const res: apiResponseInterface = await generateQuestionWithGemini(
+        prompt
+      );
+
+      if (!res.success) {
+        console.error("Failed to generate question", res);
+        return;
+      }
+
+      console.log("fetched question");
+
+      const data: Question = res.data;
+
+      const question: Question = {
+        userId: userID,
+        title: data.title,
+        question: data.question,
+        description: data.description,
+        examples: data.examples,
+        constraints: data.constraints || [],
+        edgeCases: data.edgeCases || [],
+        hints: data.hints || [],
+        topics: data.topics || [],
+        tags: data.tags || [],
+        difficulty: data.difficulty as "Easy" | "Medium" | "Hard",
+        timeComplexity: data.timeComplexity,
+        spaceComplexity: data.spaceComplexity,
+      };
+
+      console.log("generated question");
+      const id = await uploadQuestion(question);
+      if (!id) {
+        console.error("np id");
+        return;
+      }
+      console.log("uploaded to supabase");
+      const finalQuestion: Question = { ...question, id: id };
+      console.log(finalQuestion);
+
+      localStorage.removeItem(`relatedQuestions`);
+      setQuestion(finalQuestion);
+      clearAllCodes();
+    } catch (error) {
+      console.log("Error in handleChangeQuestion:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRelatedQuestions();
+  }, [question]);
   return (
     <>
       {/* header */}
       <div className="px-4 py-2 h-10 flex flex-row items-center border-b-1 border-borderc">
-        <ArrowLeft onClick={() => router.back()} className="cursor-pointer" />
+        <ArrowLeft onClick={() => handleBack()} className="cursor-pointer" />
         <h1 className="ml-auto text-2xl">Editor</h1>
       </div>
       {/* difficulty */}
@@ -61,8 +187,19 @@ const SideBar = ({ question }: { question: Question | null }) => {
           </div>
         </div> */}
       {/* related questions */}
-      <div className="p-4 flex-1">
+      <div className="p-4 flex-1 flex flex-col h-full overflow-y-auto gap-2 hide-scrollbar">
         <p className="text-border">Related Questions</p>
+        <div className="flex flex-col gap-4 pl-4 text-sm">
+          {relatedQuestions.map((item, index) => (
+            <div
+              key={index}
+              className="text-border hover:underline cursor-pointer"
+              onClick={() => handleChangeQuestion(item)}
+            >
+              {item}
+            </div>
+          ))}
+        </div>
       </div>
       {/* Footer */}
       <div className="p-4 flex flex-col gap-4">
