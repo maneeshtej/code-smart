@@ -9,11 +9,39 @@ export const fetchSelfQuestions = async () => {
     return apiResponse(false, null, "no_user_id", "Something failed", 400);
   console.log("fetching");
   try {
-    const res = await fetch("/api/supabase/fetch/question/user", {
-      method: "POST",
+    const res = await fetch(`/api/supabase/question?userID=${userID}`, {
+      method: "GET",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userID }),
     });
+
+    const data: apiResponseInterface = await res.json();
+
+    return apiResponse(
+      data.success,
+      data.data,
+      data.error,
+      data.message,
+      data.statusCode
+    );
+  } catch (error) {
+    return apiResponse(false, null, error, "Something failed", 400);
+  }
+};
+
+export const fetchLatestUserQuestion = async () => {
+  const userID = await getUserID();
+  //   const userID = null;
+  if (!userID)
+    return apiResponse(false, null, "no_user_id", "Something failed", 400);
+  console.log("fetching");
+  try {
+    const res = await fetch(
+      `/api/supabase/question?userID=${userID}&filter=latest`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
     const data: apiResponseInterface = await res.json();
 

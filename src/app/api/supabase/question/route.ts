@@ -1,6 +1,7 @@
 import { Question } from "@/constants/interfaces/questionInterfaces";
 import { apiResponse } from "@/constants/responses/apiResponse";
 import { supabase } from "@/lib/supabase/supabaseClient";
+import { NextRequest } from "next/server";
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -31,5 +32,44 @@ export async function POST(request: Request) {
     return apiResponse(true, data, null, "Successfully recieved", 200);
   } catch (error) {
     return apiResponse(false, null, error, "Insert failed", 400);
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const userID = searchParams.get("userID");
+  const filter = searchParams.get("filter");
+
+  if (!userID)
+    return apiResponse(
+      false,
+      null,
+      "missing_user_id",
+      "User ID is missing",
+      400
+    );
+
+  let query = supabase.from("questions").select("*, question_info(*)");
+
+  if (userID !== "all") {
+    query = query.eq("user_id", userID);
+  }
+
+  if (filter === "latest") {
+    query = query
+      .order("created_at", {
+        ascending: false,
+        referencedTable: "question_info",
+      })
+      .limit(1);
+  }
+
+  try {
+    const { data, error } = await query;
+
+    if (error) return apiResponse(false, null, error, "Unable to fetch", 400);
+    return apiResponse(true, data, null, "Data fetched", 200);
+  } catch (error) {
+    return apiResponse(false, null, error, "Unable to fetch", 400);
   }
 }

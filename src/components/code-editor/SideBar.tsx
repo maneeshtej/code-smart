@@ -146,7 +146,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
       </div>
       {/* difficulty */}
       <div className="flex flex-col p-4 gap-4">
-        <p className="text-border">Difficulty</p>
+        <p className="text-text-light">Difficulty</p>
         <div className="h-2 w-full rounded-full bg-background flex items-start">
           <div
             className={`h-full ${
@@ -164,7 +164,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
       </div>
       {/* topics */}
       <div className="flex flex-col px-4 py-2 gap-2">
-        <p className="text-border">Topics</p>
+        <p className="text-text-light">Topics</p>
         <div className="flex flex-wrap gap-4">
           {question &&
             question.topics.map((item, index) => (
@@ -179,7 +179,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
       </div>
       {/* constraints */}
       {/* <div className="p-4 flex w-full flex-col gap-4">
-          <p className="text-border">Constraints</p>
+          <p className="text-text-light">Constraints</p>
           <div className="flex flex-col gap-4 text-[12px] font-mono text-blue-400">
             {question?.constraints.map((item, index) => {
               return <span key={index}>{item}</span>;
@@ -188,12 +188,12 @@ const SideBar = ({ question }: { question: Question | null }) => {
         </div> */}
       {/* related questions */}
       <div className="p-4 flex-1 flex flex-col h-full overflow-y-auto gap-2 hide-scrollbar">
-        <p className="text-border">Related Questions</p>
+        <p className="text-text-light">Related Questions</p>
         <div className="flex flex-col gap-4 pl-4 text-sm">
           {relatedQuestions.map((item, index) => (
             <div
               key={index}
-              className="text-border hover:underline cursor-pointer"
+              className="text-text-light hover:underline cursor-pointer"
               onClick={() => handleChangeQuestion(item)}
             >
               {item}
@@ -206,7 +206,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
         {["Questions", "Playlists"].map((item, index) => (
           <span
             key={index}
-            className="text-border flex flex-row items-center text-sm cursor-pointer"
+            className="text-text-light flex flex-row items-center text-sm cursor-pointer"
           >
             {item}
             <Link height={10} />

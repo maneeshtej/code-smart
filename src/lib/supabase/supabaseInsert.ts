@@ -13,7 +13,7 @@ export const insertQuestion = async (question: Question) => {
     );
 
   try {
-    const res = await fetch("/api/supabase/insert/question", {
+    const res = await fetch("/api/supabase/question", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question }),

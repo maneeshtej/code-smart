@@ -24,25 +24,33 @@ export default function RootLayout({
   ];
 
   return (
-    <div className="h-screen w-screen fixed bg-background text-white font-inter flex flex-col">
-      <nav className="w-full flex flex-col sm:flex-row text-xl border-b-[0.5px] border-border">
-        <div className="hidden sm:flex flex-row gap-6 p-4 font-bold">
+    <div className="h-screen w-screen fixed bg-background text-white font-inter flex flex-row">
+      {/* Sidebar */}
+      <aside className="flex flex-col gap-4 min-w-[140px] max-w-[220px] w-56 bg-background-dark border-r border-borderc p-4 h-full">
+        <h2 className="font-bold text-base mb-2 text-text-light">Sidebar</h2>
+        {/* Navigation links */}
+        <nav className="flex flex-col gap-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={
-                isActive(link.href)
-                  ? "text-brightPurple "
-                  : "hover:text-matteTeal transition"
-              }
+              className={`py-2 px-2 rounded-lg font-medium transition-all duration-200
+                ${
+                  isActive(link.href)
+                    ? "text-white text-base font-bold"
+                    : "text-gray-400 text-sm"
+                }
+                hover:shadow-lg hover:-translate-x-1 hover:bg-background hover:text-white
+              `}
             >
               {link.label}
             </Link>
           ))}
-        </div>
-      </nav>
-      <main className="flex-1 h-full">{children}</main>
+        </nav>
+        {/* Add more sidebar content here if needed */}
+      </aside>
+      {/* Main Content */}
+      <main className="flex-1 h-full w-full">{children}</main>
     </div>
   );
 }

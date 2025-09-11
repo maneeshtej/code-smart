@@ -1,5 +1,6 @@
 "use client";
 
+import SideModal from "@/components/ui/modals";
 import { judgeResultInterface } from "@/constants/interfaces/aiResponseInterfaces";
 import { Question } from "@/constants/interfaces/questionInterfaces";
 import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
@@ -15,6 +16,7 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
   const [judgeResponse, setJudgeResponse] =
     useState<judgeResultInterface | null>(null);
   const [loading, setLoading] = useState(false);
+  const [modal, setModal] = useState(false);
 
   const fetchJudgeResponse = async () => {
     if (!question) return;
@@ -103,7 +105,7 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
       ) : (
         judgeResponse?.expectedOutcome && (
           <div className="mb-4">
-            <p className="text-sm text-border mb-1">Expected Outcome</p>
+            <p className="text-sm text-text-light mb-1">Expected Outcome</p>
             <pre className="bg-background p-3 rounded font-mono text-sm whitespace-pre-wrap">
               <code>{judgeResponse.expectedOutcome}</code>
             </pre>
@@ -134,6 +136,29 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
           )
         )}
       </div>
+      {/* Submissions */}
+      <div className="flex items-center justify-center mt-auto p-4">
+        <h1
+          className={`bg-text text-background-dark p-2 px-4 rounded-full ${
+            !judgeResponse ? "opacity-50 cursor-not-allowed" : " cursor-pointer"
+          }`}
+          onClick={() => {
+            if (judgeResponse && judgeResponse.pass !== null) setModal(true);
+          }}
+        >
+          Submit
+        </h1>
+      </div>
+      <SideModal isOpen={modal} setOpen={setModal} classname="">
+        <h1 className="p-4 w-full flex items-center justify-center font-bold">
+          Do you want to submit?
+        </h1>
+        <div className="flex flex-1 flex-row w-full p-4 items-end justify-center">
+          <div className="border-1 p-2 px-4 rounded-md border-border cursor-pointer">
+            Ok
+          </div>
+        </div>
+      </SideModal>
     </div>
   );
 };

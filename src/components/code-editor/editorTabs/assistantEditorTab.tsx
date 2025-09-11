@@ -50,7 +50,7 @@ const AssistantTabContent = ({ question }: { question: Question | null }) => {
   };
 
   return (
-    <div className="p-4 text-sm text-border h-full w-full flex flex-col gap-4">
+    <div className="p-4 text-sm text-text-light h-full w-full flex flex-col gap-4">
       <div className="flex flex-1 h-full flex-col gap-4 text-white overflow-y-auto">
         <div className="w-full flex flex-col gap-4">
           {assistantRespose.map((item, index) => {

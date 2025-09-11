@@ -9,7 +9,7 @@ import RunTabContent from "./editorTabs/runEditorTab";
 import { Play, Bot } from "lucide-react";
 
 const HintTabContent = ({ question }: { question: Question | null }) => (
-  <div className="p-4 text-sm text-border">
+  <div className="p-4 text-sm text-text-light">
     {question?.hints && question.hints.length > 0
       ? question.hints.map((hint, idx) => (
           <div key={idx} className="mb-2">
@@ -43,7 +43,7 @@ const EditorTabs = ({ question }: { question: Question | null }) => {
               className={`${
                 currentTabID === item.id
                   ? "text-text underline underline-offset-8"
-                  : "text-border"
+                  : "text-text-light"
               } cursor-pointer whitespace-nowrap`}
               onClick={() => {
                 setCurrentTabID(item.id);
@@ -61,7 +61,7 @@ const EditorTabs = ({ question }: { question: Question | null }) => {
             ${
               showAssistant
                 ? "text-white font-bold"
-                : "text-border hover:bg-background-dark"
+                : "text-text-light hover:bg-background-dark"
             }
           `}
           onClick={() => {
@@ -78,7 +78,7 @@ const EditorTabs = ({ question }: { question: Question | null }) => {
             ${
               showRun
                 ? "text-white font-bold"
-                : "text-border hover:bg-background-dark"
+                : "text-text-light hover:bg-background-dark"
             }
           `}
           onClick={() => {

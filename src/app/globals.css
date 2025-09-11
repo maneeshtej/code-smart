@@ -5,10 +5,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 
 @theme {
-  --color-background: #323232;
+  --color-background: rgb(50, 50, 50);
   --color-background-dark: rgb(10, 10, 10);
-  --color-text: #ffffff;
-  --color-border: #aaaaaa;
+  --color-text: rgb(250, 250, 250);
+  --color-text-light: rgb(170, 170, 170);
+  --color-border: rgb(70, 70, 70);
 
   /* Purple Themed Colors */
   --color-brightPurple: #a259ff;
