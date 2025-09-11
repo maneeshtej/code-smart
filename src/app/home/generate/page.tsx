@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Question } from "@/constants/interfaces/questionInterfaces";
-import {
-  apiResponseInterface,
-  StandardResponseInterface,
-} from "@/constants/interfaces/resposeInterfaces";
+import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { getSessionData } from "@/lib/auth/auth";
 import { generateQuestionWithGemini } from "@/lib/gemini/questionGenerate";
 import { uploadQuestion } from "@/lib/supabase/supabaseInsert";
@@ -13,6 +10,11 @@ import { useQuestionStore } from "@/stores/useQuestionStore";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+
+interface questionParamsInterface {
+  typeID: string;
+  difficultyID: number;
+}
 
 const Generate = () => {
   const router = useRouter();
@@ -205,7 +207,7 @@ const QuestionComponents = ({
                     : ""
                 }`}
                 onClick={() => {
-                  setQuestionParams((prev) => {
+                  setQuestionParams((prev: questionParamsInterface) => {
                     return { ...prev, difficultyID: item.id };
                   });
                 }}
