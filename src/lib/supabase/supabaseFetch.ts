@@ -54,19 +54,27 @@ export const fetchLatestUserQuestion = async () => {
   }
 };
 
-export const fetchAllQuestions = async () => {
+export const fetchUserQuestionSubmissions = async (
+  questionID: string | null
+) => {
+  if (!questionID)
+    return standardResponse(false, null, "no_id", "No question id");
+  console.log("Getting user ID");
   const userID = await getUserID();
-  if (!userID) console.error("no user ID");
-  console.log("fetching");
   try {
-    const res = await fetch("/api/supabase/fetch/question/all", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
+    console.log("fetching from supabase");
+    const res = await fetch(
+      `/api/supabase/submission?questionID=${questionID}&userID=${userID}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
-    const data = await res.json();
-    console.log(data);
+    const data: apiResponseInterface = await res.json();
+
+    return standardResponse(data.success, data.data, data.error, data.message);
   } catch (error) {
-    console.error(error);
+    return standardResponse(false, null, error, "none");
   }
 };

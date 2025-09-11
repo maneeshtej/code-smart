@@ -64,9 +64,9 @@ export interface SubmissionInterface {
   name?: string;
   solved: boolean;
   output: string;
-  message: string;
-  submittedAt: string;
-  runtimeSeconds: number;
+  messages: string[];
+  submittedAt?: string;
+  runtimeSeconds?: number;
   code: Record<string, string>;
 }
 

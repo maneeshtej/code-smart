@@ -5,18 +5,22 @@ import { judgeResultInterface } from "@/constants/interfaces/aiResponseInterface
 import { Question } from "@/constants/interfaces/questionInterfaces";
 import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { judgeWithGemini } from "@/lib/gemini/assistant";
+import { fetchUserQuestionSubmissions } from "@/lib/supabase/supabaseFetch";
+import { uploadSubmission } from "@/lib/supabase/supabaseInsert";
 import { useCodeStore } from "@/stores/useCodeStore";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const RunTabContent = ({ question }: { question: Question | null }) => {
   const codeStore = useCodeStore();
-  const mainCode = codeStore.getCurrentMainCode(); // main/test code
-  const functionCode = codeStore.getCurrentFunctionCode(); // user function code
+  const mainCode = codeStore.getCurrentMainCode();
+  const functionCode = codeStore.getCurrentFunctionCode();
+  const currentLanguage = useCodeStore((s) => s.currentLanguage);
 
   const [judgeResponse, setJudgeResponse] =
     useState<judgeResultInterface | null>(null);
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<"run" | "submissions">("run"); // <-- new tab state
 
   const fetchJudgeResponse = async () => {
     if (!question) return;
@@ -45,120 +49,212 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
     }
   };
 
+  const insertSubmissions = async () => {
+    if (
+      !judgeResponse ||
+      !judgeResponse.expectedOutcome ||
+      !judgeResponse.message ||
+      !question ||
+      !question.id
+    ) {
+      console.error("missing data");
+      return;
+    }
+
+    const stringMessages = judgeResponse.message.map((item) =>
+      JSON.stringify(item)
+    );
+
+    try {
+      const data: StandardResponseInterface = await uploadSubmission(
+        functionCode,
+        "First sub",
+        judgeResponse?.expectedOutcome,
+        stringMessages,
+        currentLanguage,
+        question?.id
+      );
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getUserQuestionSubmissions = async () => {
+    const data = await fetchUserQuestionSubmissions(question?.id || null);
+
+    console.log(data);
+  };
+
+  useEffect(() => {
+    if (activeTab === "submissions") {
+      getUserQuestionSubmissions();
+    }
+  }, [activeTab]);
+
   return (
     <div className="h-full w-full flex flex-col p-4 text-gray-100">
-      {/* Judge button */}
-      <div className="flex items-center mb-4">
+      {/* Tabs */}
+      <div className="flex mb-4 border-b border-gray-700">
         <button
-          onClick={fetchJudgeResponse}
-          className="px-6 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-200 disabled:opacity-50"
-          disabled={loading || !question}
+          className={`px-4 py-2 -mb-px font-semibold ${
+            activeTab === "run"
+              ? "border-b-2 border-blue-500 text-white"
+              : "text-gray-400 hover:text-white"
+          }`}
+          onClick={() => setActiveTab("run")}
         >
-          {loading ? "Judging..." : "Judge"}
+          Run
+        </button>
+        <button
+          className={`px-4 py-2 -mb-px font-semibold ${
+            activeTab === "submissions"
+              ? "border-b-2 border-blue-500 text-white"
+              : "text-gray-400 hover:text-white"
+          }`}
+          onClick={() => setActiveTab("submissions")}
+        >
+          Submissions
         </button>
       </div>
 
-      {/* Pass/Fail */}
-      {loading ? (
-        <div className="h-10 w-24 bg-gray-700 rounded animate-pulse mb-4" />
-      ) : (
-        judgeResponse && (
-          <h1
-            className={`text-4xl font-bold mb-4 ${
-              judgeResponse.pass ? "text-green-500" : "text-red-500"
-            }`}
-          >
-            {judgeResponse.pass ? "Pass" : "Fail"}
-          </h1>
-        )
-      )}
-
-      {/* Progress */}
-      {loading ? (
-        <div className="mb-4 w-full">
-          <div className="h-2 w-full bg-gray-700 rounded animate-pulse" />
-          <div className="h-3 w-10 bg-gray-700 rounded animate-pulse mt-2" />
-        </div>
-      ) : (
-        judgeResponse && (
-          <div className="mb-4">
-            <p className="text-sm text-gray-400 mb-1">Progress</p>
-            <div className="w-full h-2 bg-background rounded">
-              <div
-                className="h-2 bg-text rounded transition-all duration-500"
-                style={{ width: `${judgeResponse.progress}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              {judgeResponse.progress}%
-            </p>
-          </div>
-        )
-      )}
-
-      {/* Expected outcome */}
-      {loading ? (
-        <div className="mb-4">
-          <div className="h-4 w-32 bg-gray-700 rounded animate-pulse mb-2" />
-          <div className="h-16 w-full bg-gray-700 rounded animate-pulse" />
-        </div>
-      ) : (
-        judgeResponse?.expectedOutcome && (
-          <div className="mb-4">
-            <p className="text-sm text-text-light mb-1">Expected Outcome</p>
-            <pre className="bg-background p-3 rounded font-mono text-sm whitespace-pre-wrap">
-              <code>{judgeResponse.expectedOutcome}</code>
-            </pre>
-          </div>
-        )
-      )}
-
-      {/* Messages */}
-      <div className="flex flex-col gap-2 overflow-y-auto max-h-[60vh] relative z-0">
-        {loading ? (
-          <>
-            <div className="h-4 w-3/4 bg-gray-700 rounded animate-pulse" />
-            <div className="h-4 w-1/2 bg-gray-700 rounded animate-pulse" />
-            <div className="h-20 w-full bg-gray-700 rounded animate-pulse" />
-          </>
-        ) : judgeResponse?.message && judgeResponse.message.length > 0 ? (
-          judgeResponse.message.map((item, index) => (
-            <div
-              key={index}
-              className={item.type === "code" ? "font-mono text-sm" : ""}
+      {/* Tab Content */}
+      {activeTab === "run" && (
+        <>
+          {/* Existing Run Tab Content */}
+          <div className="flex items-center mb-4">
+            <button
+              onClick={fetchJudgeResponse}
+              className="px-6 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-200 disabled:opacity-50"
+              disabled={loading || !question}
             >
-              {item.content}
-            </div>
-          ))
-        ) : (
-          !loading && (
-            <div className="text-gray-400">No messages returned from AI.</div>
-          )
-        )}
-      </div>
-      {/* Submissions */}
-      <div className="flex items-center justify-center mt-auto p-4">
-        <h1
-          className={`bg-text text-background-dark p-2 px-4 rounded-full ${
-            !judgeResponse ? "opacity-50 cursor-not-allowed" : " cursor-pointer"
-          }`}
-          onClick={() => {
-            if (judgeResponse && judgeResponse.pass !== null) setModal(true);
-          }}
-        >
-          Submit
-        </h1>
-      </div>
-      <SideModal isOpen={modal} setOpen={setModal} classname="">
-        <h1 className="p-4 w-full flex items-center justify-center font-bold">
-          Do you want to submit?
-        </h1>
-        <div className="flex flex-1 flex-row w-full p-4 items-end justify-center">
-          <div className="border-1 p-2 px-4 rounded-md border-border cursor-pointer">
-            Ok
+              {loading ? "Judging..." : "Judge"}
+            </button>
           </div>
+
+          {loading ? (
+            <div className="h-10 w-24 bg-gray-700 rounded animate-pulse mb-4" />
+          ) : (
+            judgeResponse && (
+              <h1
+                className={`text-4xl font-bold mb-4 ${
+                  judgeResponse.pass ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                {judgeResponse.pass ? "Pass" : "Fail"}
+              </h1>
+            )
+          )}
+
+          {/* Progress */}
+          {loading ? (
+            <div className="mb-4 w-full">
+              <div className="h-2 w-full bg-gray-700 rounded animate-pulse" />
+              <div className="h-3 w-10 bg-gray-700 rounded animate-pulse mt-2" />
+            </div>
+          ) : (
+            judgeResponse && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-400 mb-1">Progress</p>
+                <div className="w-full h-2 bg-background rounded">
+                  <div
+                    className="h-2 bg-text rounded transition-all duration-500"
+                    style={{ width: `${judgeResponse.progress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {judgeResponse.progress}%
+                </p>
+              </div>
+            )
+          )}
+
+          {/* Expected outcome */}
+          {loading ? (
+            <div className="mb-4">
+              <div className="h-4 w-32 bg-gray-700 rounded animate-pulse mb-2" />
+              <div className="h-16 w-full bg-gray-700 rounded animate-pulse" />
+            </div>
+          ) : (
+            judgeResponse?.expectedOutcome && (
+              <div className="mb-4">
+                <p className="text-sm text-text-light mb-1">Expected Outcome</p>
+                <pre className="bg-background p-3 rounded font-mono text-sm whitespace-pre-wrap">
+                  <code>{judgeResponse.expectedOutcome}</code>
+                </pre>
+              </div>
+            )
+          )}
+
+          {/* Messages */}
+          <div className="flex flex-col gap-2 overflow-y-auto max-h-[60vh] relative z-0">
+            {loading ? (
+              <>
+                <div className="h-4 w-3/4 bg-gray-700 rounded animate-pulse" />
+                <div className="h-4 w-1/2 bg-gray-700 rounded animate-pulse" />
+                <div className="h-20 w-full bg-gray-700 rounded animate-pulse" />
+              </>
+            ) : judgeResponse?.message && judgeResponse.message.length > 0 ? (
+              judgeResponse.message.map((item, index) => (
+                <div
+                  key={index}
+                  className={item.type === "code" ? "font-mono text-sm" : ""}
+                >
+                  {item.content}
+                </div>
+              ))
+            ) : (
+              !loading && (
+                <div className="text-gray-400">
+                  No messages returned from AI.
+                </div>
+              )
+            )}
+          </div>
+
+          {/* Submissions */}
+          <div className="flex items-center justify-center mt-auto p-4">
+            <h1
+              className={`bg-text text-background-dark p-2 px-4 rounded-full ${
+                !judgeResponse
+                  ? "opacity-50 cursor-not-allowed"
+                  : " cursor-pointer"
+              }`}
+              onClick={() => {
+                if (judgeResponse && judgeResponse.pass === true)
+                  setModal(true);
+              }}
+            >
+              Submit
+            </h1>
+          </div>
+          <SideModal isOpen={modal} setOpen={setModal} classname="">
+            <h1 className="p-4 w-full flex items-center justify-center font-bold">
+              Do you want to submit?
+            </h1>
+            <div className="flex flex-1 flex-row w-full p-4 items-end justify-center gap-4">
+              <div
+                className="border-1 p-2 px-4 rounded-md border-border cursor-pointer"
+                onClick={insertSubmissions}
+              >
+                Submit
+              </div>
+              <div className="border-1 p-2 px-4 rounded-md border-border cursor-pointer">
+                Cancel
+              </div>
+            </div>
+          </SideModal>
+        </>
+      )}
+
+      {activeTab === "submissions" && (
+        <div className="flex flex-col w-full h-full items-center justify-center">
+          <h2 className="text-xl font-bold mb-4">
+            Submissions will be shown here
+          </h2>
+          {/* Later: render list of submissions and load into Monaco Editor on click */}
         </div>
-      </SideModal>
+      )}
     </div>
   );
 };
