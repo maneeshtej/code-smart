@@ -73,7 +73,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
     console.log("loading");
 
     try {
-      const userID: StandardResponseInterface = await getUserID();
+      const userID = await getUserID();
 
       // console.log(userIDRes);
 

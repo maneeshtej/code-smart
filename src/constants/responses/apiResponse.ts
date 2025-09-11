@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function apiResponse(
   success: boolean,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any = null,
   error: any = null,
   message: string = "",
