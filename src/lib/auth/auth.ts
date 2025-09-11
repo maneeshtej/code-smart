@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
-import { apiResponse } from "@/constants/responses/apiResponse";
+import { standardResponse } from "@/constants/responses/apiResponse";
 import { supabase } from "../supabase/supabaseClient";
 
 // Helper function
@@ -20,15 +20,9 @@ export const logInWithEmailAndPassword = async (
     if (data.success && data.data.session) {
       await supabase.auth.setSession(data.data.session);
     }
-    return data; // return the full apiResponse directly
+    return standardResponse(data.success, data.data, data.error, data.message);
   } catch (error) {
-    return {
-      success: false,
-      data: null,
-      error: error,
-      message: "Network error",
-      statusCode: 500,
-    };
+    return standardResponse(false, null, error, "Network error");
   }
 };
 
@@ -43,16 +37,15 @@ export const signUpWithEmailAndPassword = async (
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json();
+    const data: apiResponseInterface = await res.json();
     console.log(data);
     return data;
   } catch (error: any) {
-    return apiResponse(
+    return standardResponse(
       false,
       null,
       error?.message || "Something went wrong",
-      "Signup failed",
-      400
+      "Signup failed"
     );
   }
 };
@@ -62,26 +55,24 @@ export const getSessionData = async () => {
     const { data: sessionData, error } = await supabase.auth.getSession();
 
     if (error || !sessionData?.session?.user) {
-      return apiResponse(false, null, error, "No session", 400);
+      return standardResponse(false, null, error, "No session");
     }
 
     const userID = sessionData.session.user.id;
 
-    return apiResponse(
+    return standardResponse(
       true,
       { userID, session: sessionData.session },
       null,
-      "User exists",
-      200
+      "User exists"
     );
   } catch (error) {
-    return apiResponse(false, null, error, "Something failed", 400);
+    return standardResponse(false, null, error, "Something failed");
   }
 };
 
 export const getUserID = async () => {
-  const res = await getSessionData();
-  const sessionData: apiResponseInterface = await res.json();
+  const sessionData = await getSessionData();
   const userID = sessionData.data.userID;
   if (!userID) return null;
   return userID;

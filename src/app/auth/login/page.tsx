@@ -14,11 +14,11 @@ const Login = () => {
   // Client usage
   const handleLogin = async () => {
     setLoading(true);
-    const result = await logInWithEmailAndPassword(email, password);
-    setMessage(result.message || result.error || "");
+    const data = await logInWithEmailAndPassword(email, password);
+    setMessage(data.message || data.error || "");
     setLoading(false);
 
-    if (result.success) {
+    if (data.success) {
       router.push("/home");
     }
   };

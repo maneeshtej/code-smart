@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Question } from "@/constants/interfaces/questionInterfaces";
-import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import {
+  apiResponseInterface,
+  StandardResponseInterface,
+} from "@/constants/interfaces/resposeInterfaces";
 import { getSessionData } from "@/lib/auth/auth";
 import { generateQuestionWithGemini } from "@/lib/gemini/questionGenerate";
 import { uploadQuestion } from "@/lib/supabase/supabaseInsert";
@@ -33,15 +36,14 @@ const Generate = () => {
       try {
         setLoading(true);
         console.log("started");
-        const sessionRes = await getSessionData();
-        const sessionData: apiResponseInterface = await sessionRes.json();
+        const sessionData = await getSessionData();
         const userId = sessionData.data.userID;
         if (!userId) {
           console.error("No suer ID");
           return;
         }
         console.log("got user ID");
-        const res: apiResponseInterface = await generateQuestionWithGemini(
+        const res: StandardResponseInterface = await generateQuestionWithGemini(
           textField
         );
         const data: Question = res.data;
@@ -133,10 +135,7 @@ const Generate = () => {
               setQuestionParams={setQuestionParams}
             />
           ) : (
-            <PlaylistComponents
-              questionParams={questionParams}
-              setQuestionParams={setQuestionParams}
-            />
+            <></>
           )}
         </div>
         {/* Footer */}
@@ -219,11 +218,4 @@ const QuestionComponents = ({
       </div>
     </div>
   );
-};
-
-const PlaylistComponents = ({
-  questionParams,
-  setQuestionParams,
-}: typeComponents) => {
-  return <div className="flex w-full">Playlist params</div>;
 };

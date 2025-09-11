@@ -1,5 +1,9 @@
+import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { generateCodePrompt } from "@/constants/prompts/geminiPrompts";
-import { apiResponse } from "@/constants/responses/apiResponse";
+import {
+  apiResponse,
+  standardResponse,
+} from "@/constants/responses/apiResponse";
 
 export const generateCurrentLanguageCodeWithGemini = async (
   currentLanguage?: string,
@@ -8,7 +12,7 @@ export const generateCurrentLanguageCodeWithGemini = async (
   description?: string
 ) => {
   if (!currentLanguage)
-    return apiResponse(false, null, "no_language", "No Language Provided", 400);
+    return standardResponse(false, null, "no_language", "No Language Provided");
 
   const prompt = generateCodePrompt(
     currentLanguage,
@@ -18,12 +22,11 @@ export const generateCurrentLanguageCodeWithGemini = async (
   );
 
   if (!prompt)
-    return apiResponse(
+    return standardResponse(
       false,
       null,
       "prompt_generate_failed",
-      "Prompt has failed to generate",
-      400
+      "Prompt has failed to generate"
     );
 
   try {
@@ -33,9 +36,9 @@ export const generateCurrentLanguageCodeWithGemini = async (
       body: JSON.stringify({ prompt }),
     });
 
-    const data = await res.json();
-    return data;
+    const data: apiResponseInterface = await res.json();
+    return standardResponse(data.success, data.data, data.error, data.message);
   } catch (error) {
-    return apiResponse(false, null, error, "Something Failed", 400);
+    return standardResponse(false, null, error, "Something Failed");
   }
 };

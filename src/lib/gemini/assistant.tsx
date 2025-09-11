@@ -1,9 +1,11 @@
 import { Question } from "@/constants/interfaces/questionInterfaces";
 import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { judgePrompt } from "@/constants/prompts/geminiPrompts";
-import { apiResponse } from "@/constants/responses/apiResponse";
+import { standardResponse } from "@/constants/responses/apiResponse";
 
 export const askGeminiAssistantInEditor = async (prompt: string) => {
+  if (!prompt)
+    return standardResponse(false, null, "no_prompt", "Prompt is not passed");
   try {
     const res = await fetch("/api/gemini/general", {
       method: "POST",
@@ -11,10 +13,10 @@ export const askGeminiAssistantInEditor = async (prompt: string) => {
       body: JSON.stringify({ prompt }),
     });
 
-    const data = await res.json();
-    return data;
+    const data: apiResponseInterface = await res.json();
+    return standardResponse(data.success, data.data, data.error, data.message);
   } catch (error) {
-    return apiResponse(false, null, error, "Something failed", 400);
+    return standardResponse(false, null, error, "Something failed");
   }
 };
 
@@ -24,12 +26,11 @@ export const judgeWithGemini = async (
   question?: Question
 ) => {
   if (!mainCode || !functionCode || !question)
-    return apiResponse(
+    return standardResponse(
       false,
       null,
       "params_missing",
-      "Something is missing",
-      400
+      "Something is missing"
     );
 
   const prompt = judgePrompt(
@@ -49,8 +50,8 @@ export const judgeWithGemini = async (
 
     const data: apiResponseInterface = await res.json();
 
-    return data;
+    return standardResponse(data.success, data.data, data.error, data.message);
   } catch (error) {
-    return apiResponse(false, null, error, "Something Failed, 400");
+    return standardResponse(false, null, error, "Something Failed");
   }
 };

@@ -1,8 +1,8 @@
 "use client";
 
 import { Question } from "@/constants/interfaces/questionInterfaces";
-import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
-import { getSessionData } from "@/lib/auth/auth";
+import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import { getUserID } from "@/lib/auth/auth";
 import {
   generateQuestionWithGemini,
   generateRelatedQuestions,
@@ -25,7 +25,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
     if (!question) return;
     if (question.title === null || question.description === null) return;
 
-    const storageKey = `relatedQuestions-${question.title}`;
+    const storageKey = `relatedQuestions`;
 
     // Check localStorage first
     if (typeof window !== "undefined") {
@@ -39,21 +39,21 @@ const SideBar = ({ question }: { question: Question | null }) => {
     // Fetch from API
     setRelatedQuestions(["Fetching questions"]);
     try {
-      const res: apiResponseInterface = await generateRelatedQuestions(
+      const data: StandardResponseInterface = await generateRelatedQuestions(
         question
       );
 
-      if (!res.success) {
-        console.log(res);
+      if (!data.success) {
+        console.log(data);
         setRelatedQuestions(["Unable to fetch"]);
         return;
       }
 
-      setRelatedQuestions(res.data);
+      setRelatedQuestions(data.data);
 
       // Store in localStorage
       if (typeof window !== "undefined") {
-        localStorage.setItem(storageKey, JSON.stringify(res.data));
+        localStorage.setItem(storageKey, JSON.stringify(data.data));
       }
     } catch (error) {
       setRelatedQuestions(["Unable to fetch"]);
@@ -73,12 +73,9 @@ const SideBar = ({ question }: { question: Question | null }) => {
     console.log("loading");
 
     try {
-      const sessionRes = await getSessionData();
-      const sessionData: apiResponseInterface = await sessionRes.json();
+      const userID: StandardResponseInterface = await getUserID();
 
-      // console.log(sessionData);
-
-      const userID = sessionData.data.userID;
+      // console.log(userIDRes);
 
       if (!userID) {
         console.error("No user ID");
@@ -87,7 +84,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
       console.log("fetched ID");
 
       // Generate question using Gemini
-      const res: apiResponseInterface = await generateQuestionWithGemini(
+      const res: StandardResponseInterface = await generateQuestionWithGemini(
         prompt
       );
 

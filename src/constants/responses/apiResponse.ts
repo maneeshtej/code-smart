@@ -24,6 +24,16 @@ export function apiResponse(
   );
 }
 
-export function standardResponse(success: boolean, message: any) {
-  return { success, message };
+export function standardResponse(
+  success: boolean,
+  data: any,
+  error: any,
+  message: string
+) {
+  return {
+    success,
+    data,
+    error,
+    message,
+  };
 }

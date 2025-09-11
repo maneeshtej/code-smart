@@ -3,9 +3,8 @@
 
 import { LanguageKey } from "@/constants/interfaces/codeInterfaces";
 import { Question } from "@/constants/interfaces/questionInterfaces";
-import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { generateCurrentLanguageCodeWithGemini } from "@/lib/gemini/codeGenerate";
-import { insertQuestion } from "@/lib/supabase/supabaseInsert";
 import { useCodeStore } from "@/stores/useCodeStore";
 import { Editor } from "@monaco-editor/react";
 import { Play } from "lucide-react";
@@ -34,7 +33,7 @@ const CodeEditor = ({ question }: { question: Question | null }) => {
   const fetchCurrentLangaugeCode = async () => {
     try {
       setLoading(true);
-      const res: apiResponseInterface =
+      const data: StandardResponseInterface =
         await generateCurrentLanguageCodeWithGemini(
           currentLanguage,
           question?.title,
@@ -42,13 +41,13 @@ const CodeEditor = ({ question }: { question: Question | null }) => {
           question?.description
         );
 
-      if (!res.success) {
+      if (!data.success) {
         console.error("Error");
         return;
       }
 
-      setFunctionCode(res.data.functionCode);
-      setMainCode(res.data.mainCode);
+      setFunctionCode(data.data.functionCode);
+      setMainCode(data.data.mainCode);
     } catch (error) {
       console.error(error);
     } finally {

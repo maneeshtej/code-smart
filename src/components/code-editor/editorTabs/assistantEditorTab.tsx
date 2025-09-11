@@ -1,7 +1,7 @@
 "use client";
 
 import { Question } from "@/constants/interfaces/questionInterfaces";
-import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { assistantPrompt } from "@/constants/prompts/geminiPrompts";
 import { askGeminiAssistantInEditor } from "@/lib/gemini/assistant";
 import { useCodeStore } from "@/stores/useCodeStore";
@@ -28,17 +28,17 @@ const AssistantTabContent = ({ question }: { question: Question | null }) => {
       functionCode
     );
     try {
-      const res: apiResponseInterface = await askGeminiAssistantInEditor(
+      const data: StandardResponseInterface = await askGeminiAssistantInEditor(
         prompt
       );
-      console.log(res);
-      if (!res.success) {
+      console.log(data);
+      if (!data.success) {
         setAssistantResponse([
           { type: "message", content: "Something has failed please try agian" },
         ]);
         setTextField("");
       }
-      setAssistantResponse(res.data);
+      setAssistantResponse(data.data);
       setTextField("");
     } catch (error) {
       console.log(error);

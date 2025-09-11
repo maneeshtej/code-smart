@@ -1,5 +1,5 @@
 "use client";
-import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { signUpWithEmailAndPassword } from "@/lib/auth/auth";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -15,7 +15,7 @@ const Login = () => {
     setLoading(true);
     setMessage("");
 
-    const data: apiResponseInterface = await signUpWithEmailAndPassword(
+    const data: StandardResponseInterface = await signUpWithEmailAndPassword(
       email,
       password
     );

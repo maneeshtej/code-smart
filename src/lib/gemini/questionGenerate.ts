@@ -4,11 +4,11 @@ import {
   generateQuestionPrompt,
   relatedQuestionsPrompt,
 } from "@/constants/prompts/geminiPrompts";
-import { apiResponse } from "@/constants/responses/apiResponse";
+import { standardResponse } from "@/constants/responses/apiResponse";
 
 export const generateQuestionWithGemini = async (question: string) => {
   if (!question) {
-    return apiResponse(
+    return standardResponse(
       false,
       null,
       "missing_question",
@@ -20,7 +20,7 @@ export const generateQuestionWithGemini = async (question: string) => {
 
   if (!prompt) {
     console.error("Prompt not created");
-    return;
+    return standardResponse(false, null, "no_promp", "Prompt not genarated");
   }
 
   try {
@@ -31,15 +31,15 @@ export const generateQuestionWithGemini = async (question: string) => {
     });
 
     const data: apiResponseInterface = await res.json();
-    return data;
+    return standardResponse(data.success, data.data, data.error, data.message);
   } catch (error) {
-    return apiResponse(false, null, error, "Failed to fetch", 400);
+    return standardResponse(false, null, error, "Failed to fetch");
   }
 };
 
 export const generateRelatedQuestions = async (question: Question) => {
   if (!question) {
-    return apiResponse(
+    return standardResponse(
       false,
       null,
       "missing_question",
@@ -60,9 +60,9 @@ export const generateRelatedQuestions = async (question: Question) => {
       body: JSON.stringify({ prompt }),
     });
 
-    const data = await res.json();
-    return data;
+    const data: apiResponseInterface = await res.json();
+    return standardResponse(data.success, data.data, data.error, data.message);
   } catch (error) {
-    return apiResponse(false, null, error, "Something Failed", 400);
+    return standardResponse(false, null, error, "Something Failed");
   }
 };

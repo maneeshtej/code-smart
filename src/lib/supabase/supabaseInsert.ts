@@ -1,15 +1,17 @@
 import { Question } from "@/constants/interfaces/questionInterfaces";
-import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
-import { apiResponse } from "@/constants/responses/apiResponse";
+import {
+  apiResponseInterface,
+  StandardResponseInterface,
+} from "@/constants/interfaces/resposeInterfaces";
+import { standardResponse } from "@/constants/responses/apiResponse";
 
 export const insertQuestion = async (question: Question) => {
   if (!question)
-    return apiResponse(
+    return standardResponse(
       false,
       null,
       "missing_question",
-      "Question is missing",
-      400
+      "Question is missing"
     );
 
   try {
@@ -20,9 +22,9 @@ export const insertQuestion = async (question: Question) => {
     });
     const data: apiResponseInterface = await res.json();
 
-    return data;
+    return standardResponse(data.success, data.data, data.error, data.message);
   } catch (error) {
-    return apiResponse(false, null, error, "Unable to insert.", 400);
+    return standardResponse(false, null, error, "Unable to insert.");
   }
 };
 
@@ -30,7 +32,7 @@ export const uploadQuestion = async (question: Question) => {
   if (!question) return;
 
   try {
-    const res: apiResponseInterface = await insertQuestion(question);
+    const res: StandardResponseInterface = await insertQuestion(question);
     const questionID = res.data[0].question_id;
 
     if (!res.success || !questionID) return null;

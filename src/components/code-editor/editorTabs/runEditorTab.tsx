@@ -3,7 +3,7 @@
 import SideModal from "@/components/ui/modals";
 import { judgeResultInterface } from "@/constants/interfaces/aiResponseInterfaces";
 import { Question } from "@/constants/interfaces/questionInterfaces";
-import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { judgeWithGemini } from "@/lib/gemini/assistant";
 import { useCodeStore } from "@/stores/useCodeStore";
 import React, { useState } from "react";
@@ -23,7 +23,7 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
 
     setLoading(true);
     try {
-      const res: apiResponseInterface = await judgeWithGemini(
+      const res: StandardResponseInterface = await judgeWithGemini(
         mainCode,
         functionCode,
         question

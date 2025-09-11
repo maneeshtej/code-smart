@@ -5,7 +5,8 @@ import {
   Question,
   questionMapSnakeCaseToCamelCase,
 } from "@/constants/interfaces/questionInterfaces";
-import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+
 import { fetchLatestUserQuestion } from "@/lib/supabase/supabaseFetch";
 import { Search, UserIcon } from "lucide-react";
 import React, { ReactNode, useEffect, useState } from "react";
@@ -14,8 +15,7 @@ const Home = () => {
   const [question, setQuestion] = useState<Question>();
   const fetchLatestQuestion = async () => {
     try {
-      const res = await fetchLatestUserQuestion();
-      const data: apiResponseInterface = await res.json();
+      const data: StandardResponseInterface = await fetchLatestUserQuestion();
       if (!data.success) {
         console.error("Error", data.error);
       }

@@ -7,7 +7,10 @@ export interface apiResponseInterface {
   statusCode: number;
 }
 
-export interface standardResponseInterface {
+export interface StandardResponseInterface {
+  success: boolean;
   data: any;
   error: any;
+  message: string;
+  statusCode?: number; // optional for internal use
 }
