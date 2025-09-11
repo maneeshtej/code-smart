@@ -4,10 +4,10 @@ import { supabase } from "@/lib/supabase/supabaseClient";
 export async function POST() {
   try {
     const {
-      data: { session, error },
+      data: { session },
     } = await supabase.auth.getSession();
-    if (error || !session)
-      return apiResponse(false, null, error, "No session", 400);
+    if (!session)
+      return apiResponse(false, null, "something happened", "No session", 400);
 
     const userID = session.user.id;
 

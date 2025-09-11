@@ -5,11 +5,19 @@ import EditorTabs from "@/components/code-editor/EditorTabs";
 import SideBar from "@/components/code-editor/SideBar";
 import { useQuestionStore } from "@/stores/useQuestionStore";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Router from "next/router";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const EditorPage = () => {
   const question = useQuestionStore((s) => s.question);
+
+  useEffect(() => {
+    if (!question) {
+      alert("Please generate a question first");
+      Router.back();
+    }
+  }, [question]);
 
   const [showSidebar, setShowSidebar] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
