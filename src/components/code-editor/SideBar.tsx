@@ -133,6 +133,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
 
   useEffect(() => {
     fetchRelatedQuestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question]);
   return (
     <>
