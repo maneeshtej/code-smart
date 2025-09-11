@@ -2,13 +2,18 @@
 
 import SideModal from "@/components/ui/modals";
 import { judgeResultInterface } from "@/constants/interfaces/aiResponseInterfaces";
-import { Question } from "@/constants/interfaces/questionInterfaces";
+import {
+  Question,
+  SubmissionInterface,
+} from "@/constants/interfaces/questionInterfaces";
 import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { judgeWithGemini } from "@/lib/gemini/assistant";
 import { fetchUserQuestionSubmissions } from "@/lib/supabase/supabaseFetch";
 import { uploadSubmission } from "@/lib/supabase/supabaseInsert";
+import { LoadingScreen } from "@/lib/utils/commonUtils";
+import { getLocalItem, setLocalItem } from "@/lib/utils/localStorage";
 import { useCodeStore } from "@/stores/useCodeStore";
-import React, { useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 
 const RunTabContent = ({ question }: { question: Question | null }) => {
   const codeStore = useCodeStore();
@@ -18,9 +23,11 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
 
   const [judgeResponse, setJudgeResponse] =
     useState<judgeResultInterface | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [modal, setModal] = useState(false);
+  const [modalContent, setModalContent] = useState<ReactElement | null>(null);
   const [activeTab, setActiveTab] = useState<"run" | "submissions">("run"); // <-- new tab state
+  const [submissions, setSubmissions] = useState<SubmissionInterface[]>();
 
   const fetchJudgeResponse = async () => {
     if (!question) return;
@@ -65,6 +72,8 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
       JSON.stringify(item)
     );
 
+    setLoading(true);
+
     try {
       const data: StandardResponseInterface = await uploadSubmission(
         functionCode,
@@ -77,13 +86,31 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
       console.log(data);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const getUserQuestionSubmissions = async () => {
-    const data = await fetchUserQuestionSubmissions(question?.id || null);
+    const LOCALKEY = "local-submission";
+    try {
+      const localSubmissions = getLocalItem(LOCALKEY);
+      if (!localSubmissions) {
+        console.log("fetching subs");
+        const data = await fetchUserQuestionSubmissions(question?.id || null);
 
-    console.log(data);
+        setLocalItem(LOCALKEY, data.data, 5000);
+        console.log(data);
+
+        setSubmissions(data.data);
+        return;
+      }
+      console.log("fetching subs locally");
+
+      setSubmissions(localSubmissions);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -94,6 +121,7 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
 
   return (
     <div className="h-full w-full flex flex-col p-4 text-gray-100">
+      <LoadingScreen isLoading={loading} />
       {/* Tabs */}
       <div className="flex mb-4 border-b border-gray-700">
         <button
@@ -216,7 +244,7 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
           <div className="flex items-center justify-center mt-auto p-4">
             <h1
               className={`bg-text text-background-dark p-2 px-4 rounded-full ${
-                !judgeResponse
+                !judgeResponse && !loading
                   ? "opacity-50 cursor-not-allowed"
                   : " cursor-pointer"
               }`}
@@ -225,7 +253,7 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
                   setModal(true);
               }}
             >
-              Submit
+              {loading ? "Submitting" : "Submit"}
             </h1>
           </div>
           <SideModal isOpen={modal} setOpen={setModal} classname="">
@@ -235,7 +263,10 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
             <div className="flex flex-1 flex-row w-full p-4 items-end justify-center gap-4">
               <div
                 className="border-1 p-2 px-4 rounded-md border-border cursor-pointer"
-                onClick={insertSubmissions}
+                onClick={() => {
+                  setModal(false);
+                  insertSubmissions();
+                }}
               >
                 Submit
               </div>
@@ -248,11 +279,39 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
       )}
 
       {activeTab === "submissions" && (
-        <div className="flex flex-col w-full h-full items-center justify-center">
-          <h2 className="text-xl font-bold mb-4">
-            Submissions will be shown here
-          </h2>
-          {/* Later: render list of submissions and load into Monaco Editor on click */}
+        <div className="flex flex-col w-full h-full">
+          <h2 className="text-xl font-bold mb-4">Submissions</h2>
+          <div className="h-full w-full flex flex-1 flex-col gap-4">
+            {submissions &&
+              submissions.map((item, index) => (
+                <div
+                  key={index}
+                  className="p-4 border-border border-1 rounded-md flex flex-row gap-4 items-center "
+                  onClick={() => {
+                    setModalContent(
+                      <pre
+                        style={{
+                          padding: "1rem",
+                          borderRadius: "6px",
+                          overflowX: "auto",
+                        }}
+                        className="bg-background rounded-md text-brightGreen"
+                        key={index}
+                      >
+                        <code>{item.code.code}</code>
+                      </pre>
+                    );
+                  }}
+                >
+                  {new Date(
+                    item.submittedAt || "2025-01-01T00:00:00.000Z"
+                  ).toLocaleDateString()}
+                  <span className="text-sm font-bold text-pastelPurple">
+                    {item.code.language}
+                  </span>
+                </div>
+              ))}
+          </div>
         </div>
       )}
     </div>

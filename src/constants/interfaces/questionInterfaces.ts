@@ -70,6 +70,22 @@ export interface SubmissionInterface {
   code: Record<string, string>;
 }
 
+export interface fetchedSubmissionInterface {
+  code: {
+    code: string;
+    language: string;
+  };
+  id: string;
+  message: string[]; // array of JSON strings
+  name: string | null;
+  output: string;
+  question_id: string;
+  runtime_seconds: number;
+  solved: boolean;
+  submitted_at: string; // ISO date string
+  user_id: string;
+}
+
 export const questionMapSnakeCaseToCamelCase = (
   data: fetchedQuestionInterface
 ) => {
@@ -95,4 +111,23 @@ export const questionMapSnakeCaseToCamelCase = (
   };
 
   return question;
+};
+
+export const submissionMapSnakeCaseToCamelCase = (
+  data: fetchedSubmissionInterface
+) => {
+  const submission: SubmissionInterface = {
+    id: data.id,
+    code: data.code,
+    messages: data.message,
+    name: data.name || "No name",
+    output: data.output,
+    questionID: data.question_id,
+    runtimeSeconds: data.runtime_seconds,
+    solved: data.solved,
+    submittedAt: data.submitted_at,
+    userID: data.user_id,
+  };
+
+  return submission;
 };

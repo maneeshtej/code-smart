@@ -60,7 +60,7 @@ const AssistantTabContent = ({ question }: { question: Question | null }) => {
                   <ReactMarkdown>{item.content}</ReactMarkdown>
                 </div>
               );
-            } else if (item.type === "code") {
+            } else if (item.type === "code" || item.type === "code-insert") {
               return (
                 <pre
                   style={{
