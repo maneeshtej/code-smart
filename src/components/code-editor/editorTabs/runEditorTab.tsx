@@ -13,7 +13,7 @@ import { uploadSubmission } from "@/lib/supabase/supabaseInsert";
 import { LoadingScreen } from "@/lib/utils/commonUtils";
 import { getLocalItem, setLocalItem } from "@/lib/utils/localStorage";
 import { useCodeStore } from "@/stores/useCodeStore";
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const RunTabContent = ({ question }: { question: Question | null }) => {
   const codeStore = useCodeStore();
@@ -25,7 +25,7 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
     useState<judgeResultInterface | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [modal, setModal] = useState(false);
-  const [modalContent, setModalContent] = useState<ReactElement | null>(null);
+
   const [activeTab, setActiveTab] = useState<"run" | "submissions">("run"); // <-- new tab state
   const [submissions, setSubmissions] = useState<SubmissionInterface[]>();
 
@@ -287,21 +287,6 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
                 <div
                   key={index}
                   className="p-4 border-border border-1 rounded-md flex flex-row gap-4 items-center "
-                  onClick={() => {
-                    setModalContent(
-                      <pre
-                        style={{
-                          padding: "1rem",
-                          borderRadius: "6px",
-                          overflowX: "auto",
-                        }}
-                        className="bg-background rounded-md text-brightGreen"
-                        key={index}
-                      >
-                        <code>{item.code.code}</code>
-                      </pre>
-                    );
-                  }}
                 >
                   {new Date(
                     item.submittedAt || "2025-01-01T00:00:00.000Z"
