@@ -1,5 +1,6 @@
 "use client";
 
+import { confirmAction } from "@/components/shared/asyncModal";
 import SideModal from "@/components/ui/modals";
 import { judgeResultInterface } from "@/constants/interfaces/aiResponseInterfaces";
 import {
@@ -13,6 +14,7 @@ import { uploadSubmission } from "@/lib/supabase/supabaseInsert";
 import { LoadingScreen } from "@/lib/utils/commonUtils";
 import { getLocalItem, setLocalItem } from "@/lib/utils/localStorage";
 import { useCodeStore } from "@/stores/useCodeStore";
+import { title } from "process";
 import React, { useEffect, useState } from "react";
 
 const RunTabContent = ({ question }: { question: Question | null }) => {
@@ -91,6 +93,16 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
     }
   };
 
+  const handleSubmission = async () => {
+    if (!judgeResponse || !judgeResponse.pass === true) return;
+
+    const confirm = await confirmAction({
+      title: "Submit",
+      message: "Are you to submit?",
+    });
+    if (confirm) await insertSubmissions();
+  };
+
   const getUserQuestionSubmissions = async () => {
     const LOCALKEY = "local-submission";
     try {
@@ -111,6 +123,11 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleClickSubmission = async () => {
+    const result = await confirmAction({ title: "Test" });
+    console.log(result);
   };
 
   useEffect(() => {
@@ -248,33 +265,11 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
                   ? "opacity-50 cursor-not-allowed"
                   : " cursor-pointer"
               }`}
-              onClick={() => {
-                if (judgeResponse && judgeResponse.pass === true)
-                  setModal(true);
-              }}
+              onClick={handleSubmission}
             >
               {loading ? "Submitting" : "Submit"}
             </h1>
           </div>
-          <SideModal isOpen={modal} setOpen={setModal} classname="">
-            <h1 className="p-4 w-full flex items-center justify-center font-bold">
-              Do you want to submit?
-            </h1>
-            <div className="flex flex-1 flex-row w-full p-4 items-end justify-center gap-4">
-              <div
-                className="border-1 p-2 px-4 rounded-md border-border cursor-pointer"
-                onClick={() => {
-                  setModal(false);
-                  insertSubmissions();
-                }}
-              >
-                Submit
-              </div>
-              <div className="border-1 p-2 px-4 rounded-md border-border cursor-pointer">
-                Cancel
-              </div>
-            </div>
-          </SideModal>
         </>
       )}
 
@@ -286,7 +281,8 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
               submissions.map((item, index) => (
                 <div
                   key={index}
-                  className="p-4 border-border border-1 rounded-md flex flex-row gap-4 items-center "
+                  className="p-4 border-border border-1 rounded-md flex flex-row gap-4 items-center cursor-pointer"
+                  onClick={handleClickSubmission}
                 >
                   {new Date(
                     item.submittedAt || "2025-01-01T00:00:00.000Z"
