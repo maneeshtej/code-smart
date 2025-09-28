@@ -1,6 +1,11 @@
+"use client";
+
 import { Question } from "@/constants/interfaces/questionInterfaces";
+import { getLocalItem, setLocalItem } from "@/lib/utils/localStorage";
+import { useEffect, useState } from "react";
 
 const QuestionTabContent = ({ question }: { question: Question | null }) => {
+  const [hideHints, setHideHints] = useState(true);
   if (!question) {
     return (
       <div className="p-4 text-sm text-text-light">No question selected.</div>
@@ -70,6 +75,33 @@ const QuestionTabContent = ({ question }: { question: Question | null }) => {
         <div>
           <span className="font-semibold">Space Complexity:</span>{" "}
           <span className="text-text-light">{question.spaceComplexity}</span>
+        </div>
+      </div>
+      {/* Hints */}
+      <div className="flex flex-col gap-2 mt-2">
+        <div className="flex flex-row items-center justify-between">
+          <span className="font-semibold">Hints</span>{" "}
+          <button
+            className="hover:underline cursor-pointer px-4 py-2"
+            onClick={() => {
+              setHideHints((prev) => !prev);
+            }}
+          >
+            {hideHints ? "Show hints" : "Hide hints"}
+          </button>
+        </div>
+        <div
+          className={`${
+            hideHints ? "blur-sm" : "blur-none"
+          } transition-all duration-200 ease-in-out relative flex flex-col gap-4 pl-4`}
+        >
+          {question &&
+            question.hints.length > 0 &&
+            question.hints.map((item, index) => (
+              <span className="text-sm text-text-light" key={index}>
+                {item}
+              </span>
+            ))}
         </div>
       </div>
     </div>

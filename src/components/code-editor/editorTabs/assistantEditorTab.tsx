@@ -5,8 +5,8 @@ import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfa
 import { assistantPrompt } from "@/constants/prompts/geminiPrompts";
 import { askGeminiAssistantInEditor } from "@/lib/gemini/assistant";
 import { useCodeStore } from "@/stores/useCodeStore";
-import { SendHorizonal } from "lucide-react";
-import { useState } from "react";
+import { LoaderIcon, SendHorizonal } from "lucide-react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 const AssistantTabContent = ({ question }: { question: Question | null }) => {
@@ -14,11 +14,11 @@ const AssistantTabContent = ({ question }: { question: Question | null }) => {
   const functionCode = useCodeStore((s) => s.getCurrentFunctionCode());
   const [textField, setTextField] = useState<string>("");
   const [assistantRespose, setAssistantResponse] = useState([
-    { type: "message", content: "Ask me chad!" },
+    { type: "message", content: "Ask me" },
   ]);
 
   const getAssistantRespose = async () => {
-    setAssistantResponse([{ type: "message", content: "Loading..." }]);
+    setAssistantResponse([{ type: "loading", content: "Loading..." }]);
     const prompt = assistantPrompt(
       textField,
       currentLanguage,
@@ -49,6 +49,14 @@ const AssistantTabContent = ({ question }: { question: Question | null }) => {
     }
   };
 
+  useEffect(() => {
+    const onKeyDown = async (e: KeyboardEvent) => {
+      if (e.key === "Enter") await getAssistantRespose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [getAssistantRespose]);
+
   return (
     <div className="p-4 text-sm text-text-light h-full w-full flex flex-col gap-4">
       <div className="flex flex-1 h-full flex-col gap-4 text-white overflow-y-auto">
@@ -73,6 +81,12 @@ const AssistantTabContent = ({ question }: { question: Question | null }) => {
                 >
                   <code>{item.content}</code>
                 </pre>
+              );
+            } else if (item.type === "loading") {
+              return (
+                <div className="flex h-full w-full animate-pulse justify-center items-center">
+                  <LoaderIcon className="animate-spin" />
+                </div>
               );
             }
           })}

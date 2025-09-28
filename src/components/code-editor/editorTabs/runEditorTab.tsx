@@ -104,6 +104,7 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
   };
 
   const getUserQuestionSubmissions = async () => {
+    setLoading(true);
     const LOCALKEY = "local-submission";
     try {
       const localSubmissions = getLocalItem(LOCALKEY);
@@ -122,6 +123,8 @@ const RunTabContent = ({ question }: { question: Question | null }) => {
       setSubmissions(localSubmissions);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 

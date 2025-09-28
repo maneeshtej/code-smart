@@ -3,32 +3,17 @@
 import { Question } from "@/constants/interfaces/questionInterfaces";
 import React, { useState } from "react";
 import QuestionTabContent from "./editorTabs/questionEditorTab";
-import SolutionTabContent from "./editorTabs/solutionEditorTab";
 import AssistantTabContent from "./editorTabs/assistantEditorTab";
 import RunTabContent from "./editorTabs/runEditorTab";
 import { Play, Bot } from "lucide-react";
 
-const HintTabContent = ({ question }: { question: Question | null }) => (
-  <div className="p-4 text-sm text-text-light">
-    {question?.hints && question.hints.length > 0
-      ? question.hints.map((hint, idx) => (
-          <div key={idx} className="mb-2">
-            Hint {idx + 1}: {hint}
-          </div>
-        ))
-      : "No hints available."}
-  </div>
-);
-
 const EditorTabs = ({ question }: { question: Question | null }) => {
-  // Tabs except Run and Assistant
+  // Tabs except Run
   const tabs = [
     { id: 0, name: "Question" },
-    { id: 2, name: "Hint" },
-    { id: 3, name: "Solution" },
+    { id: 1, name: "Assistant" },
   ];
   const [currentTabID, setCurrentTabID] = useState<number>(0);
-  const [showAssistant, setShowAssistant] = useState(false);
   const [showRun, setShowRun] = useState(false);
 
   return (
@@ -47,7 +32,6 @@ const EditorTabs = ({ question }: { question: Question | null }) => {
               } cursor-pointer whitespace-nowrap`}
               onClick={() => {
                 setCurrentTabID(item.id);
-                setShowAssistant(false);
                 setShowRun(false);
               }}
             >
@@ -55,23 +39,6 @@ const EditorTabs = ({ question }: { question: Question | null }) => {
             </span>
           ))}
         </div>
-        {/* Assistant Tab */}
-        <button
-          className={`flex items-center gap-1 px-3 py-1 rounded-full ml-2 transition
-            ${
-              showAssistant
-                ? "text-white font-bold"
-                : "text-text-light hover:bg-background-dark"
-            }
-          `}
-          onClick={() => {
-            setShowAssistant(true);
-            setShowRun(false);
-          }}
-        >
-          <Bot size={16} />
-          Assistant
-        </button>
         {/* Run Tab */}
         <button
           className={`flex items-center gap-1 px-3 py-1 rounded-full ml-2 transition
@@ -83,7 +50,7 @@ const EditorTabs = ({ question }: { question: Question | null }) => {
           `}
           onClick={() => {
             setShowRun(true);
-            setShowAssistant(false);
+            // ...existing code...
           }}
         >
           <Play size={16} />
@@ -94,14 +61,10 @@ const EditorTabs = ({ question }: { question: Question | null }) => {
       <div className="flex-1 overflow-y-auto hide-scrollbar">
         {showRun ? (
           <RunTabContent question={question} />
-        ) : showAssistant ? (
-          <AssistantTabContent question={question} />
         ) : currentTabID === 0 ? (
           <QuestionTabContent question={question} />
-        ) : currentTabID === 2 ? (
-          <HintTabContent question={question} />
-        ) : currentTabID === 3 ? (
-          <SolutionTabContent question={question} />
+        ) : currentTabID === 1 ? (
+          <AssistantTabContent question={question} />
         ) : null}
       </div>
     </div>
