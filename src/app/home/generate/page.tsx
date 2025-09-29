@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { confirmAction } from "@/components/shared/asyncModal";
 import { Question } from "@/constants/interfaces/questionInterfaces";
 import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { getSessionData } from "@/lib/auth/auth";
@@ -7,9 +8,9 @@ import { generateQuestionWithGemini } from "@/lib/gemini/questionGenerate";
 import { uploadQuestion } from "@/lib/supabase/supabaseInsert";
 import { useCodeStore } from "@/stores/useCodeStore";
 import { useQuestionStore } from "@/stores/useQuestionStore";
-import { ArrowLeft } from "lucide-react";
+import { CornerDownLeft, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface questionParamsInterface {
   typeID: string;
@@ -18,206 +19,196 @@ interface questionParamsInterface {
 
 const Generate = () => {
   const router = useRouter();
-  const clearAllCodes = useCodeStore((s) => s.clearAllCodes);
   const [textField, setTextField] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const questionTypes = [
-    { id: 0, label: "Question" },
-    { id: 1, label: "Playlist" },
-  ];
-
-  const [questionParams, setQuestionParams] = useState({
-    typeID: 0,
-    difficultyID: 1,
-  });
+  const [state, setState] = useState<number>(0);
   const { setQuestion } = useQuestionStore();
-  // const [result, setResult] = useState<string>("");
+  const question = useQuestionStore((s) => s.question);
+  const clearAllCodes = useCodeStore((s) => s.clearAllCodes);
 
   const getResponse = async () => {
-    if (questionParams.typeID === 0) {
-      try {
-        setLoading(true);
-        console.log("started");
-        const sessionData = await getSessionData();
-        const userId = sessionData.data.userID;
-        if (!userId) {
-          console.error("No suer ID");
-          return;
-        }
-        console.log("got user ID");
-        const res: StandardResponseInterface = await generateQuestionWithGemini(
-          textField
-        );
-        const data: Question = res.data;
-        console.log(data);
-        const question: Question = {
-          userId: userId,
-          title: data.title,
-          question: data.question,
-          description: data.description,
-          examples: data.examples,
-          constraints: data.constraints || [],
-          edgeCases: data.edgeCases || [],
-          hints: data.hints || [],
-          topics: data.topics || [],
-          tags: data.tags || [],
-          difficulty: data.difficulty as "Easy" | "Medium" | "Hard",
-          timeComplexity: data.timeComplexity,
-          spaceComplexity: data.spaceComplexity,
-        };
-        // console.log(question);
-        console.log("generated question");
-        const id = await uploadQuestion(question);
-        if (!id) {
-          console.error("np id");
-          return;
-        }
-        console.log("uploaded to supabase");
-        const finalQuestion: Question = { ...question, id: id };
-        console.log(finalQuestion);
-        setQuestion(finalQuestion);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
+    try {
+      setLoading(true);
+      setState(1);
+      console.log("started");
+      const sessionData = await getSessionData();
+      const userId = sessionData.data.userID;
+      if (!userId) {
+        console.error("No suer ID");
+        return;
       }
+      console.log("got user ID");
+      const res: StandardResponseInterface = await generateQuestionWithGemini(
+        textField
+      );
+      console.log(res);
+      const data: Question = res.data;
+      console.log(data);
+      const question: Question = {
+        userId: userId,
+        title: data.title,
+        question: data.question,
+        description: data.description,
+        examples: data.examples,
+        constraints: data.constraints || [],
+        edgeCases: data.edgeCases || [],
+        hints: data.hints || [],
+        topics: data.topics || [],
+        tags: data.tags || [],
+        difficulty: data.difficulty as "Easy" | "Medium" | "Hard",
+        timeComplexity: data.timeComplexity,
+        spaceComplexity: data.spaceComplexity,
+      };
+      console.log(question);
+      console.log("generated question");
+      setState(2);
+      const id = await uploadQuestion(question);
+      if (!id) {
+        console.error("np id");
+        return;
+      }
+      console.log("uploaded to supabase");
+      const finalQuestion: Question = { ...question, id: id };
+      console.log(finalQuestion);
+      setQuestion(finalQuestion);
+      setState(3);
+    } catch (error) {
+      setState(-1);
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="h-full w-full flex flex-row items-center font-inter">
-      {/* Left side */}
-      <div className="flex flex-1 flex-col items-start bg-background-dark h-full w-full pt-4 gap-8">
-        {/* Header */}
-        <div className="flex w-full flex-row items-center gap-4 px-4">
-          <ArrowLeft className="cursor-pointer" />
-          <h1 className="text-2xl font-bold">Generate Question</h1>
-        </div>
-        {/* Input */}
-        <div className="flex w-full px-4">
-          <textarea
-            placeholder="Enter your topic"
-            className="resize-none bg-background w-full rounded-md p-4 outline-borderc outline-1"
-            value={textField}
-            onChange={(e) => setTextField(e.target.value)}
-          ></textarea>
-        </div>
-        {/* Type */}
-        <div className="flex flex-row items-center gap-8 pl-8 w-full overflow-x-auto">
-          <h1 className="text-xl font-bold">Type</h1>
-          <div className="flex bg-background p-2 gap-4 rounded-full">
-            {questionTypes.map((item, index) => {
-              return (
-                <div
-                  key={index}
-                  className={`cursor-pointer px-4 py-2 rounded-full ${
-                    questionParams.typeID === item.id
-                      ? "bg-text text-background-dark"
-                      : ""
-                  }`}
-                  onClick={() => {
-                    setQuestionParams((prev) => {
-                      return { ...prev, typeID: item.id };
-                    });
-                  }}
-                >
-                  {item.label}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+  const goToEditor = async () => {
+    const confirm = await confirmAction({
+      title: "Solve",
+      message: "You are going to edit page",
+    });
 
-        {/* Components */}
-        <div className="flex w-full pl-8 flex-col flex-1">
-          {/* Conditional components */}
-          {questionParams.typeID === 0 ? (
-            <QuestionComponents
-              questionParams={questionParams}
-              setQuestionParams={setQuestionParams}
-            />
+    if (confirm) {
+      clearAllCodes();
+      setTimeout(() => {
+        router.push("/editor/");
+      }, 500);
+    }
+  };
+
+  useEffect(() => {
+    if (question && question.title) {
+      setState(3);
+      return; // skip attaching the key listener
+    }
+
+    if (state !== 0) return;
+
+    const onKeyDown = async (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        await getResponse();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [question]);
+
+  return (
+    <div className="h-full w-full flex flex-col font-inter bg-background-dark">
+      {/* HEADER */}
+      <div className="p-4 text-2xl font-bold border-b-[0.5px] border-borderc">
+        Generate Question
+      </div>
+      <div className="flex flex-col p-4 gap-4 h-full w-full">
+        <h3 className="text-text-light text-sm">Enter prompt to generate</h3>
+
+        <input
+          className={`resize-none outline-none  h-fit border-b-1 border-border
+            ${
+              state === 0
+                ? "text-4xl font-bold "
+                : "text-2xl transition-all duration-200 ease-in-out"
+            }`}
+          value={textField}
+          placeholder="Enter"
+          onChange={(e) => setTextField(e.target.value)}
+          type="text"
+        ></input>
+        <div className={`flex h-full flex-1 rounded-md`}>
+          {state === 0 ? (
+            <div className="flex flex-col gap-4 h-fit w-full items-center justify-center">
+              <span className="text-sm text-text-light">
+                Press enter to generate question
+              </span>
+              <button
+                className="flex flex-row items-center justify-evenly bg-text text-background-dark px-4 py-2 
+              rounded-full cursor-pointer"
+                onClick={getResponse}
+              >
+                Generate
+                <CornerDownLeft className="h-4" />
+              </button>
+              <button
+                className="flex flex-row items-center justify-evenly bg-text text-background-dark px-4 py-2 
+              rounded-full cursor-pointer"
+                onClick={goToEditor}
+              >
+                Go to editor
+              </button>
+            </div>
+          ) : state === 1 ? (
+            <div className="flex flex-col gap-2 items-center justify-center h-full w-full">
+              <h3>Fetching question</h3>
+              <Loader className="animate-spin" />
+            </div>
+          ) : state === 2 ? (
+            <div className="flex flex-col gap-2 items-center justify-center h-full w-full">
+              <h3>Almost done</h3>
+              <Loader className="animate-spin" />
+            </div>
+          ) : state === 3 ? (
+            <div className="flex flex-col h-fit w-full bg-background rounded-md p-4 gap-4">
+              <h1 className="text-4xl font-bold">{question?.title}</h1>
+              <div className="flex flex-row gap-4">
+                {question?.topics.map((item, index) => (
+                  <span
+                    className="bg-text px-4 py-2 rounded-full text-background-dark text-sm"
+                    key={index}
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <h3 className="text-text-light text-sm">{question?.question}</h3>
+              <div className="flex w-full items-center justify-end">
+                <button
+                  className="bg-background-dark px-4 py-2 rounded-full w-fit cursor-pointer"
+                  onClick={goToEditor}
+                >
+                  Solve
+                </button>
+              </div>
+            </div>
+          ) : state === -1 ? (
+            <div className="flex flex-col gap-4 h-fit w-full items-center justify-center">
+              <span className="text-sm text-red-400">
+                Something failed please try again
+              </span>
+              <button
+                className="flex flex-row items-center justify-evenly bg-text text-background-dark px-4 py-2
+               rounded-full cursor-pointer"
+                onClick={getResponse}
+              >
+                Retry
+              </button>
+            </div>
           ) : (
             <></>
           )}
         </div>
-        {/* Footer */}
-        <div className="p-4 flex w-full justify-end gap-4">
-          <button
-            className="text-text bg-background px-4 py-2 rounded-full cursor-pointer"
-            onClick={() => {
-              clearAllCodes();
-              router.push("/editor/");
-            }}
-          >
-            Go To Editor
-          </button>
-          <button
-            className="bg-text text-background-dark px-4 py-2 rounded-full cursor-pointer"
-            onClick={getResponse}
-          >
-            Generate
-          </button>
-        </div>
-      </div>
-      {/* Right Side */}
-      <div className="flex flex-2 flex-col w-full items-center justify-center gap-10 h-full overflow-y-auto pt-40">
-        {!loading ? (
-          <div className="flex flex-1">
-            {/* <EditorTabs question={question} /> */}
-          </div>
-        ) : (
-          <div className="h-full w-full flex items-center justify-center animate-pulse">
-            Magic...
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
 export default Generate;
-
-interface typeComponents {
-  questionParams: any;
-  setQuestionParams: React.Dispatch<React.SetStateAction<any>>;
-}
-
-const QuestionComponents = ({
-  questionParams,
-  setQuestionParams,
-}: typeComponents) => {
-  const difficultyTypes = [
-    { id: 0, label: "Easy" },
-    { id: 1, label: "Medium" },
-    { id: 2, label: "Hard" },
-  ];
-  return (
-    <div className="flex w-full">
-      {/* Difficulty */}
-      <div className="flex flex-row items-center gap-8 w-full overflow-x-auto">
-        <h1 className="text-xl font-bold">Difficulty</h1>
-        <div className="flex bg-background p-2 gap-4 rounded-full">
-          {difficultyTypes.map((item, index) => {
-            return (
-              <div
-                key={index}
-                className={`cursor-pointer px-4 py-2 rounded-full ${
-                  questionParams.difficultyID === item.id
-                    ? "bg-text text-background-dark"
-                    : ""
-                }`}
-                onClick={() => {
-                  setQuestionParams((prev: questionParamsInterface) => {
-                    return { ...prev, difficultyID: item.id };
-                  });
-                }}
-              >
-                {item.label}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};

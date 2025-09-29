@@ -13,6 +13,7 @@ import { useQuestionStore } from "@/stores/useQuestionStore";
 import { ArrowLeft, Link } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { confirmAction } from "../shared/asyncModal";
 
 const SideBar = ({ question }: { question: Question | null }) => {
   const router = useRouter();
@@ -20,8 +21,10 @@ const SideBar = ({ question }: { question: Question | null }) => {
   const clearQuestion = useQuestionStore((s) => s.clearQuestion);
   const clearAllCodes = useCodeStore((s) => s.clearAllCodes);
   const setQuestion = useQuestionStore((s) => s.setQuestion);
+  const [relatedQuestionState, setRelatedQuestionState] = useState<number>(0);
 
   const fetchRelatedQuestions = async () => {
+    setRelatedQuestionState(1);
     if (!question) return;
     if (question.title === null || question.description === null) return;
 
@@ -42,10 +45,17 @@ const SideBar = ({ question }: { question: Question | null }) => {
       const data: StandardResponseInterface = await generateRelatedQuestions(
         question
       );
+      // const data: StandardResponseInterface = {
+      //   success: false,
+      //   data: null,
+      //   error: "error",
+      //   message: "test",
+      // };
 
       if (!data.success) {
         console.log(data);
         setRelatedQuestions(["Unable to fetch"]);
+        setRelatedQuestionState(-1);
         return;
       }
 
@@ -55,9 +65,12 @@ const SideBar = ({ question }: { question: Question | null }) => {
       if (typeof window !== "undefined") {
         localStorage.setItem(storageKey, JSON.stringify(data.data));
       }
+      setRelatedQuestionState(2);
     } catch (error) {
       setRelatedQuestions(["Unable to fetch"]);
       console.log(error);
+      setRelatedQuestionState(-1);
+    } finally {
     }
   };
 
@@ -70,6 +83,11 @@ const SideBar = ({ question }: { question: Question | null }) => {
 
   const handleChangeQuestion = async (prompt: string) => {
     if (relatedQuestions.length <= 0) return;
+    const confirm = await confirmAction({
+      title: "Switch question",
+      message: "This will remove current progress",
+    });
+    if (!confirm) return;
     console.log("loading");
 
     try {
@@ -87,9 +105,21 @@ const SideBar = ({ question }: { question: Question | null }) => {
       const res: StandardResponseInterface = await generateQuestionWithGemini(
         prompt
       );
+      // const res: StandardResponseInterface = {
+      //   success: false,
+      //   data: null,
+      //   error: "error",
+      //   message: "test",
+      // };
 
       if (!res.success) {
         console.error("Failed to generate question", res);
+        const confirm = await confirmAction({
+          title: "Failed",
+          message: "Unable to switch questions",
+          confirmText: "Retry",
+        });
+        if (confirm) handleChangeQuestion(prompt);
         return;
       }
 
@@ -175,20 +205,44 @@ const SideBar = ({ question }: { question: Question | null }) => {
             ))}
         </div>
       </div>
-      {/* constraints */}
-      {/* <div className="p-4 flex w-full flex-col gap-4">
-          <p className="text-text-light">Constraints</p>
-          <div className="flex flex-col gap-4 text-[12px] font-mono text-blue-400">
-            {question?.constraints.map((item, index) => {
-              return <span key={index}>{item}</span>;
-            })}
-          </div>
-        </div> */}
+
       {/* related questions */}
       <div className="p-4 flex-1 flex flex-col h-full overflow-y-auto gap-2 hide-scrollbar">
         <p className="text-text-light">Related Questions</p>
         <div className="flex flex-col gap-4 pl-4 text-sm">
-          {relatedQuestions.map((item, index) => (
+          {relatedQuestionState === 0 ? (
+            <div className="h-full w-full animate-pulse flex items-center justify-center">
+              fetching
+            </div>
+          ) : relatedQuestionState === 1 ? (
+            <div className="h-full w-full flex items-center justify-center animate-pulse">
+              loading
+            </div>
+          ) : relatedQuestionState === 2 ? (
+            <div className="flex gap-2 flex-col">
+              {relatedQuestions.map((item, index) => (
+                <div
+                  key={index}
+                  className="text-text-light hover:underline cursor-pointer"
+                  onClick={() => handleChangeQuestion(item)}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          ) : relatedQuestionState === -1 ? (
+            <div className="h-full w-full flex items-center justify-center">
+              <button
+                className="bg-text text-background-dark px-4 py-2 rounded-full cursor-pointer"
+                onClick={fetchRelatedQuestions}
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <></>
+          )}
+          {/* {relatedQuestions.map((item, index) => (
             <div
               key={index}
               className="text-text-light hover:underline cursor-pointer"
@@ -196,7 +250,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
             >
               {item}
             </div>
-          ))}
+          ))} */}
         </div>
       </div>
       {/* Footer */}

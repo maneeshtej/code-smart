@@ -3,7 +3,10 @@
 
 import { LanguageKey } from "@/constants/interfaces/codeInterfaces";
 import { Question } from "@/constants/interfaces/questionInterfaces";
-import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import {
+  apiResponseInterface,
+  StandardResponseInterface,
+} from "@/constants/interfaces/resposeInterfaces";
 import { generateCurrentLanguageCodeWithGemini } from "@/lib/gemini/codeGenerate";
 import { useCodeStore } from "@/stores/useCodeStore";
 import { Editor } from "@monaco-editor/react";
@@ -20,6 +23,7 @@ const CodeEditor = ({ question }: { question: Question | null }) => {
   // Loading states
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [state, setState] = useState<number>(0);
 
   const languages: LanguageKey[] = [
     "java",
@@ -41,8 +45,16 @@ const CodeEditor = ({ question }: { question: Question | null }) => {
           question?.description
         );
 
+      // const data: StandardResponseInterface = {
+      //   data: null,
+      //   error: "error",
+      //   message: "unable",
+      //   success: false,
+      // };
+
       if (!data.success) {
         console.error("Error");
+        setState(-1);
         return;
       }
 
@@ -99,7 +111,8 @@ const CodeEditor = ({ question }: { question: Question | null }) => {
           <select
             value={currentLanguage}
             onChange={(e) => setLanguage(e.target.value as LanguageKey)}
-            className="bg-background-dark border border-borderc text-text text-sm rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brightPurple"
+            className="bg-background-dark border border-borderc text-text text-sm rounded-md 
+            px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brightPurple"
           >
             {languages.map((lang) => (
               <option key={lang} value={lang}>
@@ -111,10 +124,15 @@ const CodeEditor = ({ question }: { question: Question | null }) => {
           <div className="w-32 h-8 bg-background rounded-md animate-pulse" />
         )}
 
-        <button className="ml-auto flex flex-row items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold text-brightPurple hover:bg-brightPurple/10 transition-colors">
-          <span>Run</span>
-          <Play height={14} />
-        </button>
+        {state === -1 && (
+          <button
+            className="ml-auto flex flex-row items-center gap-2 px-3 py-1 rounded-full text-sm 
+         hover:bg-brightPurple/10 transition-colors cursor-pointer"
+            onClick={fetchCurrentLangaugeCode}
+          >
+            <span>Retry</span>
+          </button>
+        )}
       </div>
       <div className="flex w-full h-5"></div>
 
