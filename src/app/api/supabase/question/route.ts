@@ -39,6 +39,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const userID = searchParams.get("userID");
   const filter = searchParams.get("filter");
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "10");
 
   if (!userID)
     return apiResponse(
@@ -64,11 +66,21 @@ export async function GET(request: NextRequest) {
       .limit(1);
   }
 
+  const from = (page - 1) * limit;
+  const to = from + limit;
+  query = query.range(from, to);
+
   try {
     const { data, error } = await query;
 
     if (error) return apiResponse(false, null, error, "Unable to fetch", 400);
-    return apiResponse(true, data, null, "Data fetched", 200);
+    return apiResponse(
+      true,
+      { data, pagination: { page, limit, hasMore: data.length === limit } },
+      null,
+      "Data fetched",
+      200
+    );
   } catch (error) {
     return apiResponse(false, null, error, "Unable to fetch", 400);
   }

@@ -5,55 +5,41 @@ import {
 import { getUserID } from "../auth/auth";
 import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import {
+  fetchedQuestionInterface,
   fetchedSubmissionInterface,
+  Question,
+  questionMapSnakeCaseToCamelCase,
   SubmissionInterface,
   submissionMapSnakeCaseToCamelCase,
 } from "@/constants/interfaces/questionInterfaces";
 
-export const fetchSelfQuestions = async () => {
-  const userID = await getUserID();
-  //   const userID = null;
-  if (!userID)
-    return apiResponse(false, null, "no_user_id", "Something failed", 400);
-  console.log("fetching");
+export interface fetchUserQuestionDataInterface {
+  data: Question[];
+  pagination: { page: number; limit: number; hasMore: boolean };
+}
+
+export const fetchUserQuestions = async (page: number, limit: number) => {
+  if (!page || !limit)
+    return standardResponse(false, null, "no_params", "No parameters");
   try {
-    const res = await fetch(`/api/supabase/question?userID=${userID}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+    const userID = await getUserID();
+    if (!userID)
+      return standardResponse(false, null, "no_user_ID", "No user ID");
 
-    const data: apiResponseInterface = await res.json();
-
-    return apiResponse(
-      data.success,
-      data.data,
-      data.error,
-      data.message,
-      data.statusCode
-    );
-  } catch (error) {
-    return apiResponse(false, null, error, "Something failed", 400);
-  }
-};
-
-export const fetchLatestUserQuestion = async () => {
-  const userID = await getUserID();
-  //   const userID = null;
-  if (!userID)
-    return standardResponse(false, null, "no_user_id", "Something failed");
-  console.log("fetching");
-  try {
     const res = await fetch(
-      `/api/supabase/question?userID=${userID}&filter=latest`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
+      `/api/supabase/question?userID=${userID}&page=${page}&limit=${limit}`
+    );
+    const data: apiResponseInterface = await res.json();
+    const parsedData = data.data.data.map((item: fetchedQuestionInterface) =>
+      questionMapSnakeCaseToCamelCase(item)
     );
 
-    const data: apiResponseInterface = await res.json();
-
-    return standardResponse(data.success, data.data, data.error, data.message);
+    return standardResponse(
+      data.success,
+      { data: parsedData, pagination: data.data.pagination },
+      data.error,
+      data.message
+    );
   } catch (error) {
     return standardResponse(false, null, error, "Something failed");
   }
