@@ -14,6 +14,7 @@ import { ArrowLeft, Link } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { confirmAction } from "../shared/asyncModal";
+import { getLocalItem, setLocalItem } from "@/lib/utils/localStorage";
 
 const SideBar = ({ question }: { question: Question | null }) => {
   const router = useRouter();
@@ -32,9 +33,10 @@ const SideBar = ({ question }: { question: Question | null }) => {
 
     // Check localStorage first
     if (typeof window !== "undefined") {
-      const cached = localStorage.getItem(storageKey);
+      const cached = getLocalItem(storageKey);
       if (cached) {
         setRelatedQuestions(JSON.parse(cached));
+        setRelatedQuestionState(2);
         return; // skip API call
       }
     }
@@ -64,6 +66,7 @@ const SideBar = ({ question }: { question: Question | null }) => {
       // Store in localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem(storageKey, JSON.stringify(data.data));
+        setLocalItem(storageKey, JSON.stringify(data.data), 10000);
       }
       setRelatedQuestionState(2);
     } catch (error) {

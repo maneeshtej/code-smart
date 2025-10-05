@@ -3,7 +3,7 @@
 import { confirmAction } from "@/components/shared/asyncModal";
 import { Question } from "@/constants/interfaces/questionInterfaces";
 import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
-import { getSessionData } from "@/lib/auth/auth";
+import { getSessionData, manageLogin } from "@/lib/auth/auth";
 import { generateQuestionWithGemini } from "@/lib/gemini/questionGenerate";
 import { uploadQuestion } from "@/lib/supabase/supabaseInsert";
 import { useCodeStore } from "@/stores/useCodeStore";
@@ -112,6 +112,10 @@ const Generate = () => {
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [question]);
+
+  useEffect(() => {
+    manageLogin(router);
+  }, []);
 
   return (
     <div className="h-full w-full flex flex-col font-inter bg-background-dark">

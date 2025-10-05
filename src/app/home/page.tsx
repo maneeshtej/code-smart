@@ -6,12 +6,15 @@ import {
   questionMapSnakeCaseToCamelCase,
 } from "@/constants/interfaces/questionInterfaces";
 import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import { manageLogin } from "@/lib/auth/auth";
 
 import {
   fetchUserQuestionDataInterface,
   fetchUserQuestions,
 } from "@/lib/supabase/supabaseFetch";
 import { getLocalItem, setLocalItem } from "@/lib/utils/localStorage";
+import { useCodeStore } from "@/stores/useCodeStore";
+import { useQuestionStore } from "@/stores/useQuestionStore";
 import { Loader, Search, UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { ReactNode, useEffect, useState } from "react";
@@ -19,10 +22,14 @@ import React, { ReactNode, useEffect, useState } from "react";
 const Home = () => {
   const [questions, setQuestion] = useState<
     fetchUserQuestionDataInterface | number
-  >(-1);
+  >(0);
+  const setEditorQuestion = useQuestionStore((s) => s.setQuestion);
+  const clearAllCodes = useCodeStore((s) => s.clearAllCodes);
   const router = useRouter();
-  const fetchQuestions = async () => {
+
+  const fetchQuestions = async (page: number) => {
     setQuestion(0);
+    console.log("loading");
     const localKey = "local-questions";
     const localData = getLocalItem(localKey);
     if (localData) {
@@ -33,12 +40,15 @@ const Home = () => {
       return;
     }
     try {
-      const res: StandardResponseInterface = await fetchUserQuestions(1, 10);
+      const res: StandardResponseInterface = await fetchUserQuestions(page, 10);
       if (res.error) {
         console.log(res);
         setQuestion(-1);
+        return;
       }
       const data: fetchUserQuestionDataInterface = res.data;
+      console.log(data.pagination.hasMore);
+      console.log(data.pagination.page);
       setLocalItem(localKey, JSON.stringify(data), 5000);
       setQuestion(data);
     } catch (error) {
@@ -47,12 +57,13 @@ const Home = () => {
     }
   };
   useEffect(() => {
-    // fetchQuestions();
+    fetchQuestions(1);
+    manageLogin(router);
   }, []);
   return (
     <div className="h-screen w-full bg-background-dark text-text font-inter flex flex-col">
       {/* ---HEADER--- */}
-      <div className="p-0 px-8 flex flex-row items-center border-b border-border">
+      <div className="p-0 px-4 flex flex-row items-center border-b border-border">
         <h1 className="text-2xl font-bold mr-auto">
           Welcome <span className="text-green-300">Tej</span>
         </h1>
@@ -72,7 +83,7 @@ const Home = () => {
       {/* ---!HEADER--- */}
       {/* ---BODY--- */}
       <div className="h-full w-full flex flex-col gap-4 p-4">
-        <h1 className="text-4xl font-bold">Questions</h1>
+        <h1 className="text-lg">Questions</h1>
         {typeof questions === "number" ? (
           questions === 0 ? (
             // Loading
@@ -85,7 +96,7 @@ const Home = () => {
               <span>Failed to fetch</span>
               <button
                 className="bg-text text-background-dark cursor-pointer px-4 py-2 rounded-full"
-                onClick={fetchQuestions}
+                onClick={() => fetchQuestions(1)}
               >
                 Retry
               </button>
@@ -108,7 +119,12 @@ const Home = () => {
                   <div
                     key={q.id}
                     className="p-4 rounded-xl bg-background border border-border shadow-sm hover:shadow-md transition 
-                    flex flex-row items-center justify-between text-sm gap-4"
+                    flex flex-row items-center justify-between text-sm gap-4 cursor-pointer"
+                    onClick={() => {
+                      setEditorQuestion(q);
+                      clearAllCodes();
+                      router.push("/editor/");
+                    }}
                   >
                     <span className="font-bold text-sm">{q.title}</span>
                     <div className="flex flex-row gap-4">
@@ -140,7 +156,29 @@ const Home = () => {
             )}
 
             {/* Pagination Info */}
-            <div className="text-xs text-gray-400 mt-4">
+            <div className="text-xs text-gray-400 mt-auto flex flex-col w-full gap-4">
+              {typeof questions !== "number" && (
+                <div className="flex flex-row w-full gap-4 text-sm">
+                  <button
+                    className={`bg-text text-background-dark rounded-full px-4 py-2 cursor-pointer
+                  ${
+                    questions.pagination.page === 1
+                      ? "bg-background cursor-not-allowed"
+                      : "bg-text"
+                  }`}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className={`bg-text text-background-dark rounded-full px-4 py-2 cursor-pointer
+                  ${
+                    questions.pagination.hasMore ? "bg-text" : "bg-background"
+                  }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
               Page {questions.pagination.page} (limit{" "}
               {questions.pagination.limit}){" "}
               {questions.pagination.hasMore ? "– more available" : "– end"}

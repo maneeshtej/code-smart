@@ -1,6 +1,7 @@
 "use client";
 
 import { logInWithEmailAndPassword } from "@/lib/auth/auth";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -57,12 +58,19 @@ const Login = () => {
            hover:bg-softPurple hover:text-background"
             onClick={handleLogin}
           >
-            Register
+            Login
           </button>
         </div>
 
         <h1 className="mt-4 text-center text-sm">{message}</h1>
         {loading && <h1 className="mt-4 text-center text-sm">Loading...</h1>}
+        <span className="text-text-light text-sm">
+          Don't have an account?
+          <Link href={"/auth/signup"} className="text-blue-400">
+            {" "}
+            Sign up
+          </Link>
+        </span>
       </div>
     </div>
   );

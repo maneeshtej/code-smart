@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { apiResponseInterface } from "@/constants/interfaces/resposeInterfaces";
+import {
+  apiResponseInterface,
+  StandardResponseInterface,
+} from "@/constants/interfaces/resposeInterfaces";
 import { standardResponse } from "@/constants/responses/apiResponse";
 import { supabase } from "../supabase/supabaseClient";
+import { useRouter } from "next/navigation";
 
 // Helper function
 // Helper
@@ -76,4 +80,11 @@ export const getUserID = async () => {
   const userID = sessionData.data.userID;
   if (!userID) return null;
   return userID;
+};
+
+export const manageLogin = async (router: ReturnType<typeof useRouter>) => {
+  const data: StandardResponseInterface = await getSessionData();
+  if (!data.success) {
+    router.push("/auth/login");
+  }
 };

@@ -1,6 +1,7 @@
 "use client";
 import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { signUpWithEmailAndPassword } from "@/lib/auth/auth";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -66,6 +67,13 @@ const Login = () => {
 
         <h1 className="mt-4 text-center text-sm">{message}</h1>
         {loading && <h1 className="mt-4 text-center text-sm">Loading...</h1>}
+        <span className="text-text-light text-sm">
+          Already have an account?
+          <Link href={"/auth/login"} className="text-blue-400">
+            {" "}
+            Login
+          </Link>
+        </span>
       </div>
     </div>
   );

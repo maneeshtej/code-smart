@@ -18,9 +18,6 @@ export default function RootLayout({
   const navLinks = [
     { href: "/home/generate", label: "Generate" },
     { href: "/home/", label: "Dashboard" },
-    { href: "/home/playlists", label: "Playlists" },
-    { href: "/home/questions", label: "Questions" },
-    { href: "/home/progress", label: "Progress" },
   ];
 
   return (

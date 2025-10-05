@@ -3,16 +3,22 @@
 import CodeEditor from "@/components/code-editor/CodeEditor";
 import EditorTabs from "@/components/code-editor/EditorTabs";
 import SideBar from "@/components/code-editor/SideBar";
+import { manageLogin } from "@/lib/auth/auth";
 import { useQuestionStore } from "@/stores/useQuestionStore";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const EditorPage = () => {
   const question = useQuestionStore((s) => s.question);
-
+  const router = useRouter();
   const [showSidebar, setShowSidebar] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
+
+  useEffect(() => {
+    manageLogin(router);
+  }, []);
 
   return (
     <div className="h-screen w-screen bg-background-dark text-text font-open-sans flex flex-row relative">
