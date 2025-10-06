@@ -1,5 +1,8 @@
 "use client";
 
+import { showSideModal } from "@/components/code-editor/home/sideQuestionModal";
+import { confirmAction } from "@/components/shared/asyncModal";
+import { showToast } from "@/components/shared/showToast";
 import {
   fetchedQuestionInterface,
   Question,
@@ -7,6 +10,7 @@ import {
 } from "@/constants/interfaces/questionInterfaces";
 import { StandardResponseInterface } from "@/constants/interfaces/resposeInterfaces";
 import { manageLogin } from "@/lib/auth/auth";
+import { deleteQuestion } from "@/lib/supabase/supabaseDelete";
 
 import {
   fetchUserQuestionDataInterface,
@@ -55,6 +59,79 @@ const Home = () => {
       console.error(error);
       setQuestion(-1);
     }
+  };
+
+  const showQuestionModal = (question: Question) => {
+    showSideModal({
+      title: "Question Details",
+      content: (
+        <div>
+          <h3 className="text-lg font-semibold">{question.title}</h3>
+          <p className="mt-2 text-sm opacity-90">{question.description}</p>
+          <p className="mt-4 text-sm text-text-light">
+            Difficulty: {question.difficulty}
+          </p>
+          <div className="flex flex-wrap gap-2 mt-3">
+            {question.tags.map((tag) => (
+              <span
+                key={tag}
+                className="px-2 py-1 text-xs bg-background rounded-md border border-borderc"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      ),
+      buttons: [
+        {
+          label: "Solve",
+          onClick: () => {
+            setEditorQuestion(question);
+            clearAllCodes();
+            router.push("/editor/");
+          },
+          closeOnClick: true,
+        },
+        {
+          label: "Delete",
+          onClick: async () => {
+            const handleDelete = async () => {
+              const confirm = await confirmAction({
+                title: "Delete question",
+                message: "Are you sure to delete the question?",
+              });
+              if (confirm) {
+                const res: StandardResponseInterface = await deleteQuestion(
+                  question.id || "none"
+                );
+                if (res.success) {
+                  showToast({
+                    message: "Successfully deleted",
+                    duration: 1000,
+                    type: "success",
+                  });
+                  fetchQuestions(
+                    typeof questions !== "number"
+                      ? questions.pagination.page
+                      : 1
+                  );
+                } else if (!res.success) {
+                  showToast({
+                    message: "Error: deletion failed",
+                    duration: 2000,
+                    type: "error",
+                  });
+                }
+              }
+            };
+            await handleDelete();
+          },
+          variant: "danger",
+          closeOnClick: true,
+        },
+      ],
+    });
   };
   useEffect(() => {
     fetchQuestions(1);
@@ -121,9 +198,7 @@ const Home = () => {
                     className="p-4 rounded-xl bg-background border border-border shadow-sm hover:shadow-md transition 
                     flex flex-row items-center justify-between text-sm gap-4 cursor-pointer"
                     onClick={() => {
-                      setEditorQuestion(q);
-                      clearAllCodes();
-                      router.push("/editor/");
+                      showQuestionModal(q);
                     }}
                   >
                     <span className="font-bold text-sm">{q.title}</span>

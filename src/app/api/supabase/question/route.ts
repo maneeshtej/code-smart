@@ -85,3 +85,27 @@ export async function GET(request: NextRequest) {
     return apiResponse(false, null, error, "Unable to fetch", 400);
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  const url = new URL(request.url);
+  const questionID = url.searchParams.get("questionID");
+
+  if (!questionID) {
+    return apiResponse(
+      false,
+      null,
+      "missing_question_id",
+      "Question ID is required",
+      400
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("questions")
+    .delete()
+    .eq("id", questionID);
+
+  if (error) return apiResponse(false, null, error, "Delete failed", 400);
+
+  return apiResponse(true, data, null, "Question deleted successfully", 200);
+}
